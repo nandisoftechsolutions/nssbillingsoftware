@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/google96db5abeddfa5338.html",
+      "dest": "/google96db5abeddfa5338.html"
+    },
+    {
       "src": "/manifest.json",
       "dest": "/manifest.json"
     },
