@@ -1,0 +1,694 @@
+/* CONTACT PAGE – Nandi Billing Software */
+
+/* Root Wrapper */
+.nandiContact-page {
+  background: radial-gradient(circle at top left, #5a807dff 0, #416d61ff 45%, #2b547aff 100%);
+  color: #8cc4bbff;
+  min-height: 100vh;
+}
+
+/* Utility */
+.nandiContact-gradientText {
+  background: linear-gradient(135deg, #f97316, #facc15);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.nandiContact-sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.nandiContact-sectionSubtitle {
+  color: #9ca3af;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ------------------------------------
+   HERO SECTION
+------------------------------------ */
+.nandiContact-hero {
+  padding: 70px 0 40px;
+}
+
+.nandiContact-brandRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.nandiContact-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.8);
+}
+
+.nandiContact-brandName {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+.nandiContact-brandTagline {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.nandiContact-heroTitle {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #f9fafb;
+}
+
+.nandiContact-heroSubtitle {
+  color: #9ca3af;
+  max-width: 520px;
+  margin-bottom: 24px;
+}
+
+.nandiContact-heroStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.nandiContact-statItem {
+  background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.25), rgba(15, 23, 42, 0.9));
+  border-radius: 16px;
+  padding: 14px 16px;
+  min-width: 120px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 12px 35px rgba(92, 146, 137, 0.7);
+}
+
+.nandiContact-statNumber {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #f97316;
+}
+
+.nandiContact-statLabel {
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+/* Hero visual */
+.nandiContact-heroVisual {
+  position: relative;
+  min-height: 260px;
+}
+
+.nandiContact-heroCard {
+  position: relative;
+  margin-left: auto;
+  max-width: 360px;
+  background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.12), rgba(15, 23, 42, 0.95));
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.9);
+  padding: 18px 18px 14px;
+  overflow: hidden;
+}
+
+.nandiContact-heroCardHeader {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
+.nandiContact-heroBadge {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(249, 115, 22, 0.12);
+  color: #f97316;
+}
+
+.nandiContact-heroCardBody {
+  text-align: center;
+}
+
+.nandiContact-heroIcon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, #f97316, #b45309);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.nandiContact-heroCardBody h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.nandiContact-heroCardBody p {
+  font-size: 0.85rem;
+  color: #d1d5db;
+  margin-bottom: 10px;
+}
+
+.nandiContact-heroHighlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.nandiContact-heroHighlights span {
+  font-size: 0.75rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(121, 148, 186, 0.9);
+  color: #e5e7eb;
+}
+
+.nandiContact-heroFooter {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(51, 65, 85, 0.9);
+  font-size: 0.8rem;
+  color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nandiContact-onlineDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.25);
+}
+
+/* Floating tags */
+.nandiContact-floatingTag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: #e5e7eb;
+  font-size: 0.78rem;
+  animation: nandiContact-float 6s ease-in-out infinite;
+}
+
+.nandiContact-tagIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nandiContact-tag1 {
+  top: 10%;
+  left: 8%;
+  animation-delay: 0s;
+}
+.nandiContact-tag2 {
+  top: 40%;
+  right: 2%;
+  animation-delay: 1s;
+}
+.nandiContact-tag3 {
+  bottom: 12%;
+  left: 4%;
+  animation-delay: 2s;
+}
+
+@keyframes nandiContact-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ------------------------------------
+   CONTACT METHODS
+------------------------------------ */
+.nandiContact-methodSection {
+  padding: 30px 0 10px;
+}
+
+.nandiContact-methodCard {
+  display: block;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 1));
+  border-radius: 18px;
+  padding: 18px 16px;
+  border: 1px solid rgba(31, 41, 55, 0.95);
+  text-decoration: none;
+  color: #e5e7eb;
+  transition: transform 0.2s ease, box-shadow 0.3s ease, border-color 0.2s ease,
+    background 0.3s ease;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.nandiContact-methodCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(249, 115, 22, 0.16), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nandiContact-methodCard:hover {
+  transform: translateY(-4px);
+  border-color: rgba(249, 115, 22, 0.7);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.9);
+}
+
+.nandiContact-methodCard:hover::before {
+  opacity: 1;
+}
+
+.nandiContact-methodIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.nandiContact-methodTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.nandiContact-methodDetails {
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  margin-bottom: 4px;
+}
+
+.nandiContact-methodDescription {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 0;
+}
+
+.nandiContact-methodArrow {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* ------------------------------------
+   FORM + INFO
+------------------------------------ */
+.nandiContact-formSection {
+  padding: 32px 0 32px;
+}
+
+.nandiContact-formCard {
+  background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 1));
+  border-radius: 24px;
+  border: 1px solid rgba(31, 41, 55, 0.95);
+  padding: 24px 22px 22px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.9);
+}
+
+.nandiContact-formTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.nandiContact-formSubtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-bottom: 18px;
+}
+
+.nandiContact-form {
+  margin-top: 4px;
+}
+
+.nandiContact-formGroup {
+  margin-bottom: 14px;
+}
+
+.nandiContact-formGroup label {
+  display: block;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+  margin-bottom: 4px;
+}
+
+.nandiContact-formGroup input,
+.nandiContact-formGroup select,
+.nandiContact-formGroup textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(55, 65, 81, 0.95);
+  background: rgba(15, 23, 42, 0.9);
+  color: #f9fafb;
+  padding: 9px 10px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.nandiContact-formGroup textarea {
+  resize: vertical;
+}
+
+.nandiContact-formGroup input::placeholder,
+.nandiContact-formGroup textarea::placeholder {
+  color: #6b7280;
+}
+
+.nandiContact-formGroup input:focus,
+.nandiContact-formGroup select:focus,
+.nandiContact-formGroup textarea:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.6);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* Submit Button */
+.nandiContact-submitBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #f97316, #facc15);
+  color: #111827;
+  padding: 10px 22px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.15s ease;
+  min-width: 170px;
+}
+
+.nandiContact-submitBtn:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(249, 115, 22, 0.5);
+  filter: brightness(1.05);
+}
+
+.nandiContact-submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.nandiContact-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 2px solid rgba(17, 24, 39, 0.4);
+  border-top-color: #111827;
+  animation: nandiContact-spin 0.75s linear infinite;
+}
+
+@keyframes nandiContact-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Info Card */
+.nandiContact-infoCard {
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 1));
+  border-radius: 22px;
+  border: 1px solid rgba(31, 41, 55, 0.95);
+  padding: 20px 18px 18px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.9);
+}
+
+.nandiContact-infoTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.nandiContact-infoItem {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.nandiContact-infoIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.nandiContact-infoContent h6 {
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.nandiContact-infoContent a {
+  display: block;
+  font-size: 0.8rem;
+  color: #f97316;
+  text-decoration: none;
+}
+
+.nandiContact-infoContent a:hover {
+  text-decoration: underline;
+}
+
+.nandiContact-infoContent p {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.nandiContact-socialLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nandiContact-socialLinks a {
+  font-size: 0.78rem;
+  color: #e5e7eb;
+  text-decoration: none;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(31, 41, 55, 0.95);
+}
+
+.nandiContact-socialLinks a:hover {
+  background: rgba(249, 115, 22, 0.8);
+}
+
+.nandiContact-hours {
+  margin-top: 10px;
+}
+
+.nandiContact-hours h6 {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.nandiContact-hoursList {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.nandiContact-hourRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nandiContact-miniNote {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 10px;
+  border-top: 1px dashed rgba(55, 65, 81, 0.9);
+  padding-top: 8px;
+}
+
+/* ------------------------------------
+   FAQ
+------------------------------------ */
+.nandiContact-faqSection {
+  padding: 24px 0 32px;
+}
+
+.nandiContact-faqList {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 20px;
+  border: 1px solid rgba(31, 41, 55, 0.95);
+  padding: 18px 16px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.9);
+}
+
+.nandiContact-faqItem {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+}
+
+.nandiContact-faqItem:last-child {
+  border-bottom: none;
+}
+
+.nandiContact-faqQuestion {
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.nandiContact-faqAnswer {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.nandiContact-moreHelp {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.nandiContact-moreHelp a {
+  color: #f97316;
+  text-decoration: none;
+}
+
+.nandiContact-moreHelp a:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------
+   CTA
+------------------------------------ */
+.nandiContact-ctaSection {
+  padding: 24px 0 40px;
+}
+
+.nandiContact-ctaCard {
+  border-radius: 24px;
+  padding: 20px 18px;
+  background: linear-gradient(135deg, #f97316, #facc15);
+  color: #111827;
+  box-shadow: 0 20px 45px rgba(249, 115, 22, 0.7);
+}
+
+.nandiContact-ctaTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.nandiContact-ctaSubtitle {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.nandiContact-ctaActions .btn {
+  border-radius: 999px;
+}
+
+/* ------------------------------------
+   RESPONSIVE
+------------------------------------ */
+@media (max-width: 991.98px) {
+  .nandiContact-hero {
+    padding-top: 40px;
+  }
+
+  .nandiContact-heroTitle {
+    font-size: 2rem;
+  }
+
+  .nandiContact-heroVisual {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  .nandiContact-heroCard {
+    margin-inline: auto;
+  }
+
+  .nandiContact-floatingTag {
+    transform: scale(0.95);
+  }
+}
+
+@media (max-width: 767.98px) {
+  .nandiContact-hero {
+    padding: 26px 0 18px;
+  }
+
+  .nandiContact-heroTitle {
+    font-size: 1.7rem;
+  }
+
+  .nandiContact-heroStats {
+    gap: 10px;
+  }
+
+  .nandiContact-statItem {
+    flex: 1 1 calc(50% - 10px);
+  }
+
+  .nandiContact-methodSection {
+    padding-top: 18px;
+  }
+
+  .nandiContact-formCard,
+  .nandiContact-infoCard,
+  .nandiContact-faqList {
+    padding: 18px 14px;
+  }
+
+  .nandiContact-ctaCard {
+    text-align: center;
+  }
+
+  .nandiContact-ctaActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nandiContact-ctaActions .btn {
+    margin-bottom: 6px;
+  }
+}

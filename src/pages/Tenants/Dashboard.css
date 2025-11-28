@@ -1,0 +1,1241 @@
+/* Dashboard.css - Modern Responsive Design with Unique Class Names */
+
+/* CSS Variables */
+:root {
+  --nandi-primary: #2563eb;
+  --nandi-primary-dark: #1d4ed8;
+  --nandi-success: #10b981;
+  --nandi-warning: #f59e0b;
+  --nandi-danger: #ef4444;
+  --nandi-info: #3b82f6;
+  --nandi-secondary: #64748b;
+  --nandi-purple: #8b5cf6;
+  --nandi-light: #f8fafc;
+  --nandi-dark: #1e293b;
+  --nandi-gray: #64748b;
+  --nandi-gray-light: #e2e8f0;
+  --nandi-border: #e2e8f0;
+  --nandi-border-light: #e5e7eb;
+  --nandi-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1),
+    0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --nandi-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --nandi-radius: 0.5rem;
+  --nandi-radius-lg: 0.75rem;
+  --nandi-transition: all 0.2s ease-in-out;
+}
+
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base Container */
+.nandi-dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.nandi-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar - Mobile First */
+.nandi-dashboard-sidebar {
+  width: 100%;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-right: 1px solid var(--nandi-border);
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.nandi-dashboard-sidebar.active {
+  transform: translateX(0);
+}
+
+/* Mobile Menu Toggle */
+.nandi-dashboard-mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: var(--nandi-primary);
+  color: white;
+  border: none;
+  border-radius: var(--nandi-radius);
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--nandi-shadow-lg);
+}
+
+.nandi-dashboard-mobile-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Overlay for mobile menu */
+.nandi-dashboard-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+.nandi-dashboard-overlay.active {
+  display: block;
+}
+
+/* Main Content */
+.nandi-dashboard-main {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Header */
+.nandi-dashboard-header {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid var(--nandi-border);
+  padding: 1rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--nandi-shadow);
+}
+
+.nandi-dashboard-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-header-text {
+  flex: 1;
+  min-width: 0;
+  order: 1; /* Text comes first on mobile */
+}
+
+/* Small pill above title */
+.nandi-dashboard-welcome-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+}
+
+.nandi-dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--nandi-dark);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.nandi-dashboard-welcome {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--nandi-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+.nandi-dashboard-subtitle {
+  font-size: 0.875rem;
+  color: var(--nandi-gray);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.nandi-dashboard-header-actions {
+  flex-shrink: 0;
+  width: 100%;
+  order: 2; /* Actions come after text on mobile */
+}
+
+.nandi-dashboard-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--nandi-danger);
+  color: white;
+  border: none;
+  border-radius: var(--nandi-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--nandi-transition);
+  text-decoration: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.nandi-dashboard-logout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: var(--nandi-shadow-lg);
+}
+
+.nandi-logout-icon {
+  font-size: 1rem;
+}
+
+/* Loading State */
+.nandi-dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  flex: 1;
+  min-height: 50vh;
+}
+
+.nandi-dashboard-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--nandi-gray-light);
+  border-top: 3px solid var(--nandi-primary);
+  border-radius: 50%;
+  animation: nandi-spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes nandi-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.nandi-dashboard-loading-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--nandi-dark);
+  margin: 0 0 0.5rem 0;
+}
+
+.nandi-dashboard-loading-subtext {
+  color: var(--nandi-gray);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Content */
+.nandi-dashboard-content {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+/* Error Banner */
+.nandi-dashboard-error-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--nandi-radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: var(--nandi-shadow);
+}
+
+.nandi-error-icon {
+  font-size: 1.25rem;
+  color: var(--nandi-danger);
+}
+
+.nandi-retry-btn {
+  background: var(--nandi-danger);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--nandi-radius);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--nandi-transition);
+  margin-left: auto;
+}
+
+.nandi-retry-btn:hover {
+  background: #dc2626;
+}
+
+/* Section Titles */
+.nandi-dashboard-section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--nandi-dark);
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  line-height: 1.3;
+}
+
+.nandi-section-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+/* Stats Grid */
+.nandi-dashboard-stats-section {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-stat-card {
+  background: white;
+  border-radius: var(--nandi-radius);
+  padding: 1.25rem;
+  box-shadow: var(--nandi-shadow);
+  border: 1px solid var(--nandi-border);
+  transition: var(--nandi-transition);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 140px;
+}
+
+.nandi-dashboard-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--nandi-shadow-lg);
+}
+
+.nandi-stat-card-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex: 1;
+}
+
+.nandi-stat-card-icon {
+  flex-shrink: 0;
+}
+
+.nandi-stat-icon {
+  font-size: 2rem;
+  opacity: 0.9;
+}
+
+.nandi-stat-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.nandi-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--nandi-dark);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+.nandi-stat-label {
+  font-size: 0.8rem;
+  color: var(--nandi-gray);
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.nandi-stat-warning {
+  color: var(--nandi-danger);
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.nandi-stat-card-footer {
+  border-top: 1px solid var(--nandi-border-light);
+  padding-top: 0.75rem;
+  margin-top: auto;
+}
+
+.nandi-stat-card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--nandi-primary);
+  border: 1px solid var(--nandi-primary);
+  border-radius: var(--nandi-radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--nandi-transition);
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.nandi-stat-card-action:hover {
+  background: var(--nandi-primary);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.nandi-action-icon {
+  font-size: 0.8rem;
+}
+
+.nandi-stat-card-info {
+  font-size: 0.7rem;
+  color: var(--nandi-gray);
+  text-align: center;
+  display: block;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+
+/* Stat Card Color Variants */
+.nandi-stat-card-sales {
+  border-left: 4px solid var(--nandi-primary);
+}
+.nandi-stat-card-sales .nandi-stat-icon {
+  color: var(--nandi-primary);
+}
+
+.nandi-stat-card-customers {
+  border-left: 4px solid var(--nandi-success);
+}
+.nandi-stat-card-customers .nandi-stat-icon {
+  color: var(--nandi-success);
+}
+
+.nandi-stat-card-products {
+  border-left: 4px solid var(--nandi-info);
+}
+.nandi-stat-card-products .nandi-stat-icon {
+  color: var(--nandi-info);
+}
+
+.nandi-stat-card-invoices {
+  border-left: 4px solid var(--nandi-warning);
+}
+.nandi-stat-card-invoices .nandi-stat-icon {
+  color: var(--nandi-warning);
+}
+
+.nandi-stat-card-purchases {
+  border-left: 4px solid var(--nandi-secondary);
+}
+.nandi-stat-card-purchases .nandi-stat-icon {
+  color: var(--nandi-secondary);
+}
+
+.nandi-stat-card-suppliers {
+  border-left: 4px solid var(--nandi-purple);
+}
+.nandi-stat-card-suppliers .nandi-stat-icon {
+  color: var(--nandi-purple);
+}
+
+.nandi-stat-card-purchase-invoices {
+  border-left: 4px solid #f59e0b;
+}
+.nandi-stat-card-purchase-invoices .nandi-stat-icon {
+  color: #f59e0b;
+}
+
+.nandi-stat-card-summary {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+.nandi-stat-card-summary .nandi-stat-icon {
+  color: #10b981;
+}
+
+/* Actions Section */
+.nandi-dashboard-actions-section {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-action-card {
+  background: white;
+  border-radius: var(--nandi-radius);
+  padding: 1.25rem;
+  box-shadow: var(--nandi-shadow);
+  border: 1px solid var(--nandi-border);
+  transition: var(--nandi-transition);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 100px;
+}
+
+.nandi-dashboard-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--nandi-shadow-lg);
+  text-decoration: none;
+  color: inherit;
+}
+
+.nandi-action-card-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--nandi-radius);
+  background: var(--nandi-light);
+}
+
+.nandi-action-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.nandi-action-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nandi-dark);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+  word-wrap: break-word;
+}
+
+.nandi-action-card-description {
+  font-size: 0.8rem;
+  color: var(--nandi-gray);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.nandi-action-card-arrow {
+  font-size: 1.125rem;
+  color: var(--nandi-gray);
+  font-weight: 700;
+  transition: var(--nandi-transition);
+  flex-shrink: 0;
+}
+
+.nandi-dashboard-action-card:hover .nandi-action-card-arrow {
+  transform: translateX(3px);
+  color: var(--nandi-primary);
+}
+
+/* Action Card Color Variants */
+.nandi-action-primary {
+  border-left: 4px solid var(--nandi-primary);
+}
+.nandi-action-primary .nandi-action-card-icon {
+  background: #dbeafe;
+  color: var(--nandi-primary);
+}
+
+.nandi-action-secondary {
+  border-left: 4px solid var(--nandi-secondary);
+}
+.nandi-action-secondary .nandi-action-card-icon {
+  background: #f1f5f9;
+  color: var(--nandi-secondary);
+}
+
+.nandi-action-success {
+  border-left: 4px solid var(--nandi-success);
+}
+.nandi-action-success .nandi-action-card-icon {
+  background: #dcfce7;
+  color: var(--nandi-success);
+}
+
+.nandi-action-warning {
+  border-left: 4px solid var(--nandi-warning);
+}
+.nandi-action-warning .nandi-action-card-icon {
+  background: #fef3c7;
+  color: var(--nandi-warning);
+}
+
+.nandi-action-info {
+  border-left: 4px solid var(--nandi-info);
+}
+.nandi-action-info .nandi-action-card-icon {
+  background: #dbeafe;
+  color: var(--nandi-info);
+}
+
+.nandi-action-purple {
+  border-left: 4px solid var(--nandi-purple);
+}
+.nandi-action-purple .nandi-action-card-icon {
+  background: #f3e8ff;
+  color: var(--nandi-purple);
+}
+
+/* Summary Section */
+.nandi-dashboard-summary-section {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.nandi-dashboard-summary-card {
+  background: white;
+  border-radius: var(--nandi-radius);
+  padding: 1.25rem;
+  box-shadow: var(--nandi-shadow);
+  border: 1px solid var(--nandi-border);
+  border-left: 4px solid var(--nandi-primary);
+  height: 100%;
+}
+
+.nandi-summary-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nandi-dark);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.nandi-summary-card-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nandi-summary-card-list li {
+  padding: 0.5rem 0;
+  color: var(--nandi-gray);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--nandi-border-light);
+  position: relative;
+  padding-left: 1rem;
+  word-wrap: break-word;
+}
+
+.nandi-summary-card-list li:last-child {
+  border-bottom: none;
+}
+
+.nandi-summary-card-list li::before {
+  content: "•";
+  color: var(--nandi-primary);
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* Trial Badges */
+.nandi-trial-info-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--nandi-radius);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  display: inline-block;
+}
+
+.nandi-trial-expired-badge {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--nandi-radius);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  display: inline-block;
+}
+
+.nandi-trial-expired-badge a {
+  color: #dc2626;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* =============================================
+   MOBILE STYLES (up to 767px)
+   ============================================= */
+@media (max-width: 767px) {
+  .nandi-dashboard-mobile-toggle {
+    display: flex;
+  }
+
+  .nandi-dashboard-header {
+    padding: 1rem;
+    padding-top: 5rem; /* More space for mobile toggle */
+  }
+
+  .nandi-dashboard-header-content {
+    gap: 0.75rem;
+  }
+
+  .nandi-dashboard-header-top {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .nandi-dashboard-header-text {
+    order: 1;
+    text-align: left;
+  }
+
+  .nandi-dashboard-header-actions {
+    order: 2;
+    width: 100%;
+  }
+
+  .nandi-dashboard-title {
+    font-size: 1.375rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+
+  .nandi-dashboard-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .nandi-dashboard-welcome-pill {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .nandi-dashboard-logout-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+
+  .nandi-dashboard-content {
+    padding: 1rem;
+    gap: 1.25rem;
+  }
+
+  .nandi-dashboard-stats-grid,
+  .nandi-dashboard-actions-grid,
+  .nandi-dashboard-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .nandi-dashboard-action-card {
+    flex-direction: row;
+    text-align: left;
+    min-height: 90px;
+    padding: 1rem;
+  }
+
+  .nandi-action-card-arrow {
+    display: block;
+  }
+
+  /* Trial badges on mobile */
+  .nandi-trial-info-badge,
+  .nandi-trial-expired-badge {
+    display: block;
+    margin: 0.5rem 0 0 0;
+    width: fit-content;
+  }
+
+  /* Stack cards vertically on very small screens */
+  @media (max-width: 360px) {
+    .nandi-dashboard-header {
+      padding: 0.75rem;
+      padding-top: 4.5rem;
+    }
+
+    .nandi-dashboard-content {
+      padding: 0.75rem;
+    }
+
+    .nandi-dashboard-stat-card,
+    .nandi-dashboard-action-card,
+    .nandi-dashboard-summary-card {
+      padding: 1rem;
+    }
+
+    .nandi-stat-card-content {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .nandi-action-card-icon {
+      width: 45px;
+      height: 45px;
+      font-size: 1.75rem;
+    }
+
+    .nandi-dashboard-title {
+      font-size: 1.25rem;
+    }
+
+    .nandi-dashboard-subtitle {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+/* =============================================
+   TABLET AND DESKTOP STYLES (768px and up)
+   ============================================= */
+@media (min-width: 768px) {
+  .nandi-dashboard-sidebar {
+    position: static;
+    width: 280px;
+    transform: translateX(0);
+  }
+
+  .nandi-dashboard-main {
+    margin-left: 0;
+    width: calc(100% - 280px);
+  }
+
+  .nandi-dashboard-mobile-toggle {
+    display: none;
+  }
+
+  .nandi-dashboard-overlay {
+    display: none !important;
+  }
+
+  .nandi-dashboard-header {
+    padding: 1.5rem 2rem;
+    padding-top: 1.5rem; /* Reset padding for desktop */
+  }
+
+  .nandi-dashboard-header-content {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .nandi-dashboard-header-top {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .nandi-dashboard-header-text {
+    order: 0; /* Reset order */
+    flex: 1;
+  }
+
+  .nandi-dashboard-header-actions {
+    order: 0; /* Reset order */
+    width: auto;
+  }
+
+  .nandi-dashboard-logout-btn {
+    width: auto;
+    min-width: 120px;
+  }
+
+  .nandi-dashboard-content {
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .nandi-dashboard-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .nandi-section-icon {
+    font-size: 1.75rem;
+  }
+
+  .nandi-dashboard-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .nandi-dashboard-stat-card {
+    padding: 1.5rem;
+    min-height: 160px;
+  }
+
+  .nandi-stat-card-content {
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .nandi-stat-icon {
+    font-size: 2.5rem;
+  }
+
+  .nandi-stat-value {
+    font-size: 1.75rem;
+  }
+
+  .nandi-stat-label {
+    font-size: 0.875rem;
+  }
+
+  .nandi-stat-card-action {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .nandi-dashboard-actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .nandi-dashboard-action-card {
+    padding: 1.5rem;
+    gap: 1rem;
+    min-height: 120px;
+  }
+
+  .nandi-action-card-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 2.5rem;
+  }
+
+  .nandi-action-card-title {
+    font-size: 1.125rem;
+  }
+
+  .nandi-action-card-description {
+    font-size: 0.875rem;
+  }
+
+  .nandi-dashboard-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .nandi-dashboard-summary-card {
+    padding: 1.5rem;
+  }
+
+  .nandi-summary-card-title {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+
+  .nandi-summary-card-list li {
+    font-size: 0.875rem;
+  }
+
+  /* Trial badges on desktop */
+  .nandi-trial-info-badge,
+  .nandi-trial-expired-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+  }
+}
+
+/* =============================================
+   LARGE DESKTOP STYLES (1200px and up)
+   ============================================= */
+@media (min-width: 1200px) {
+  .nandi-dashboard-sidebar {
+    width: 300px;
+  }
+
+  .nandi-dashboard-main {
+    width: calc(100% - 300px);
+  }
+
+  .nandi-dashboard-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .nandi-dashboard-actions-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .nandi-dashboard-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* =============================================
+   LANDSCAPE MOBILE OPTIMIZATION
+   ============================================= */
+@media (max-height: 500px) and (orientation: landscape) {
+  .nandi-dashboard-sidebar {
+    overflow-y: auto;
+    height: 100vh;
+  }
+
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card {
+    min-height: 120px;
+  }
+
+  .nandi-dashboard-content {
+    padding: 1rem;
+  }
+
+  .nandi-dashboard-header {
+    padding: 0.75rem 1rem;
+    padding-top: 4rem;
+  }
+}
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+@media print {
+  .nandi-dashboard-sidebar,
+  .nandi-dashboard-header-actions,
+  .nandi-dashboard-actions-section,
+  .nandi-dashboard-summary-section,
+  .nandi-dashboard-mobile-toggle {
+    display: none !important;
+  }
+
+  .nandi-dashboard-main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .nandi-dashboard-header {
+    position: static;
+    border: none;
+    padding: 1rem 0;
+  }
+
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card,
+  .nandi-dashboard-summary-card {
+    box-shadow: none;
+    border: 1px solid #000;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .nandi-dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* =============================================
+   DARK MODE SUPPORT
+   ============================================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --nandi-light: #1e293b;
+    --nandi-dark: #f1f5f9;
+    --nandi-gray: #cbd5e1;
+    --nandi-gray-light: #334155;
+    --nandi-border: #475569;
+    --nandi-border-light: #475569;
+  }
+
+  .nandi-dashboard-container {
+    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+  }
+
+  .nandi-dashboard-sidebar {
+    background: #020617;
+    border-color: #1e293b;
+  }
+
+  .nandi-dashboard-header {
+    background: rgba(15, 23, 42, 0.96);
+    border-color: #1e293b;
+  }
+
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card,
+  .nandi-dashboard-summary-card {
+    background: #020617;
+    color: var(--nandi-dark);
+    border-color: #1e293b;
+  }
+
+  .nandi-dashboard-action-card .nandi-action-card-icon {
+    background: #111827;
+  }
+
+  .nandi-stat-card-summary {
+    background: linear-gradient(135deg, #052e16 0%, #020617 100%);
+  }
+}
+
+/* =============================================
+   HIGH CONTRAST MODE SUPPORT
+   ============================================= */
+@media (prefers-contrast: high) {
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card,
+  .nandi-dashboard-summary-card {
+    border: 2px solid #000;
+  }
+
+  .nandi-dashboard-logout-btn,
+  .nandi-stat-card-action {
+    border: 2px solid;
+  }
+
+  .nandi-dashboard-sidebar {
+    border-right: 2px solid #000;
+  }
+
+  .nandi-dashboard-header {
+    border-bottom: 2px solid #000;
+  }
+}
+
+/* =============================================
+   REDUCED MOTION SUPPORT
+   ============================================= */
+@media (prefers-reduced-motion: reduce) {
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card,
+  .nandi-dashboard-logout-btn,
+  .nandi-stat-card-action,
+  .nandi-dashboard-sidebar {
+    transition: none;
+  }
+
+  .nandi-dashboard-spinner {
+    animation: none;
+    border-top-color: transparent;
+  }
+
+  .nandi-dashboard-action-card:hover .nandi-action-card-arrow {
+    transform: none;
+  }
+
+  .nandi-dashboard-stat-card:hover,
+  .nandi-dashboard-action-card:hover,
+  .nandi-dashboard-logout-btn:hover,
+  .nandi-stat-card-action:hover {
+    transform: none;
+  }
+}
+
+/* =============================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================= */
+@media (hover: none) and (pointer: coarse) {
+  .nandi-dashboard-stat-card:hover,
+  .nandi-dashboard-action-card:hover {
+    transform: none;
+    box-shadow: var(--nandi-shadow);
+  }
+
+  .nandi-dashboard-logout-btn:hover,
+  .nandi-stat-card-action:hover {
+    transform: none;
+  }
+
+  .nandi-dashboard-action-card:hover .nandi-action-card-arrow {
+    transform: none;
+  }
+
+  /* Increase tap targets for mobile */
+  .nandi-dashboard-stat-card,
+  .nandi-dashboard-action-card {
+    min-height: 120px;
+  }
+
+  .nandi-stat-card-action,
+  .nandi-dashboard-logout-btn {
+    min-height: 44px;
+  }
+}
+
+/* =============================================
+   VERY LARGE SCREENS
+   ============================================= */
+@media (min-width: 1600px) {
+  .nandi-dashboard-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .nandi-dashboard-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .nandi-dashboard-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .nandi-dashboard-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

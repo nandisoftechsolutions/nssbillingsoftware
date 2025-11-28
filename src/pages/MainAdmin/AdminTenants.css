@@ -1,0 +1,605 @@
+/* AdminTenants.css - Simplified Design */
+
+/* Layout */
+.tenants-admin-layout {
+   min-height: 100vh;
+  background: radial-gradient(circle at top left, #e0ebff 0, #f4f6fb 35%, #f5f7fb 100%);
+  color: #111827;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  display: flex;
+}
+
+.tenants-admin-main {
+  flex: 1;
+  margin-left: 250px;
+  padding: 20px;
+}
+
+/* Header */
+.tenants-admin-header {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tenants-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 24px;
+}
+
+.tenants-breadcrumb {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.tenants-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.tenants-subtitle {
+  color: #666;
+  font-size: 16px;
+}
+
+.tenants-header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.tenants-refresh-btn,
+.tenants-back-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tenants-refresh-btn {
+  background: #007bff;
+  color: white;
+}
+
+.tenants-refresh-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.tenants-refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tenants-back-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.tenants-back-btn:hover {
+  background: #545b62;
+}
+
+/* Statistics */
+.tenants-stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tenants-stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tenants-stat-icon {
+  font-size: 32px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+}
+
+.tenants-stat-content {
+  flex: 1;
+}
+
+.tenants-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.tenants-stat-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* Filters */
+.tenants-filters-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.tenants-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tenants-search-input,
+.tenants-filter-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.tenants-search-input:focus,
+.tenants-filter-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Form */
+.tenants-form-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tenants-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.tenants-form-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.tenants-cancel-btn {
+  padding: 8px 16px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tenants-cancel-btn:hover {
+  background: #545b62;
+}
+
+.tenants-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tenants-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tenants-form-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.tenants-form-input,
+.tenants-form-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.tenants-form-input:focus,
+.tenants-form-select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.tenants-form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tenants-submit-btn {
+  padding: 12px 32px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tenants-submit-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.tenants-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Table */
+.tenants-table-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tenants-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tenants-table-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.tenants-results-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.tenants-table-wrapper {
+  overflow-x: auto;
+}
+
+.tenants-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.tenants-table th {
+  background: #f8f9fa;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tenants-table td {
+  padding: 16px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tenants-table-row:hover {
+  background: #f8f9fa;
+}
+
+.tenants-table-row-expired {
+  background: #fff5f5;
+}
+
+.tenants-table-row-expired:hover {
+  background: #ffe6e6;
+}
+
+/* Table Cells */
+.tenants-table-company {
+  min-width: 180px;
+}
+
+.tenants-company-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.tenants-trial-badge {
+  background: #ffc107;
+  color: #212529;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tenants-table-contact {
+  min-width: 160px;
+}
+
+.tenants-contact-email {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.tenants-contact-phone {
+  font-size: 13px;
+  color: #666;
+}
+
+.tenants-table-plan {
+  min-width: 120px;
+}
+
+.tenants-plan-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.tenants-plan-price {
+  font-size: 13px;
+  color: #666;
+}
+
+.tenants-table-subscription {
+  min-width: 180px;
+}
+
+.tenants-subscription-dates {
+  margin-bottom: 8px;
+}
+
+.tenants-start-date,
+.tenants-expiry-date {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.tenants-days-remaining {
+  font-size: 12px;
+  font-weight: 600;
+  color: #28a745;
+  background: #d4edda;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+/* Status Badges */
+.tenants-status-badge {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.tenants-status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.tenants-status-expired {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.tenants-status-suspended {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Action Buttons */
+.tenants-table-actions {
+  min-width: 300px;
+}
+
+.tenants-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tenants-action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tenants-edit-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.tenants-edit-btn:hover {
+  background: #138496;
+}
+
+.tenants-extend-btn {
+  background: #28a745;
+  color: white;
+}
+
+.tenants-extend-btn:hover {
+  background: #218838;
+}
+
+.tenants-plan-btn {
+  background: #6f42c1;
+  color: white;
+}
+
+.tenants-plan-btn:hover {
+  background: #5a2d91;
+}
+
+.tenants-status-btn {
+  background: #ffc107;
+  color: #212529;
+}
+
+.tenants-status-btn:hover {
+  background: #e0a800;
+}
+
+.tenants-email-btn {
+  background: #20c997;
+  color: white;
+}
+
+.tenants-email-btn:hover {
+  background: #1ba87e;
+}
+
+.tenants-delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.tenants-delete-btn:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.tenants-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Empty State */
+.tenants-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.tenants-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.tenants-empty-state h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.tenants-empty-state p {
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tenants-admin-main {
+    margin-left: 0;
+    padding: 16px;
+  }
+  
+  .tenants-header-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .tenants-header-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .tenants-stats-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .tenants-filters-container {
+    flex-direction: column;
+  }
+  
+  .tenants-search-input,
+  .tenants-filter-select {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .tenants-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tenants-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .tenants-action-buttons {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .tenants-admin-main {
+    padding: 12px;
+  }
+  
+  .tenants-admin-header {
+    padding: 20px;
+  }
+  
+  .tenants-title {
+    font-size: 24px;
+  }
+  
+  .tenants-stat-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .tenants-stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .tenants-action-buttons {
+    flex-direction: column;
+  }
+  
+  .tenants-action-btn {
+    width: 100%;
+  }
+}

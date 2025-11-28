@@ -1,0 +1,522 @@
+/* ---------------------- */
+/* MAIN SIDEBAR STYLE */
+/* ---------------------- */
+.nandi-sidebar {
+  width: 270px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #d0d0d0;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow-y: auto;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  color: #1a1a1a !important;
+  z-index: 1100;
+  transform: translateX(0);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Scrollbar */
+.nandi-sidebar::-webkit-scrollbar {
+  width: 12px;
+}
+.nandi-sidebar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.nandi-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* State classes */
+.nandi-sidebar.closed {
+  /* By default visible on desktop; hidden on mobile via media query */
+}
+
+/* ---------------------- */
+/* BRANDING HEADER - UPDATED */
+/* ---------------------- */
+.nandi-sidebar-header {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  color: #000000 !important;
+}
+
+.tenant-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.tenant-icon {
+  font-size: 34px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.tenant-brand-text h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #000 !important;
+  line-height: 1.2;
+}
+
+.tenant-brand-text span {
+  font-size: 12px;
+  color: #666 !important;
+  font-weight: 500;
+}
+
+/* ---------------------- */
+/* TENANT INFO BOX - UPDATED */
+/* ---------------------- */
+.tenant-box {
+  margin-top: 15px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.tenant-title {
+  font-size: 11px;
+  color: #64748b !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.tenant-email {
+  font-weight: 500;
+  font-size: 13px;
+  color: #475569 !important;
+  word-break: break-all;
+  margin-bottom: 2px;
+}
+
+.tenant-name {
+  font-size: 12px;
+  color: #64748b !important;
+  font-weight: 500;
+}
+
+/* ---------------------- */
+/* NAVIGATION LINKS */
+/* ---------------------- */
+.nandi-sidebar-links {
+  flex-grow: 1;
+  margin-top: 15px;
+}
+
+.nandi-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: #1a1a1a !important;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nandi-link:hover {
+  background: #e8f0ff;
+  color: #0056e0 !important;
+  transform: translateX(4px);
+}
+
+.nandi-link.active {
+  background: #0056e0;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 86, 224, 0.3);
+}
+
+.link-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.nandi-link:hover .link-icon {
+  transform: scale(1.1);
+}
+
+.link-label {
+  flex: 1;
+}
+
+/* ---------------------- */
+/* BOTTOM SECTION - UPDATED */
+/* ---------------------- */
+.nandi-sidebar-bottom {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 15px;
+  margin-top: auto;
+}
+
+/* LOGOUT BUTTON */
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #ffecec;
+  color: #b80000 !important;
+  border: 1px solid #ffb3b3;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-bottom: 15px;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background: #ffdad8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(184, 0, 0, 0.15);
+}
+
+.logout-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.logout-icon {
+  font-size: 18px;
+}
+
+/* SIDEBAR FOOTER */
+.sidebar-footer {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.copyright-text {
+  font-size: 11px;
+  color: #64748b !important;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.nandi-solutions-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #667eea !important;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.nandi-solutions-link:hover {
+  background: rgba(102, 126, 234, 0.15);
+  color: #5a67d8 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.nandi-icon {
+  font-size: 14px;
+}
+
+/* ---------------------- */
+/* MOBILE TOGGLE BUTTON */
+/* ---------------------- */
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #d0d0d0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.22);
+}
+
+.sidebar-toggle-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Hide toggle on desktop */
+@media (min-width: 768px) {
+  .sidebar-toggle-btn {
+    display: none;
+  }
+}
+
+/* ---------------------- */
+/* BACKDROP FOR MOBILE */
+/* ---------------------- */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1000;
+  display: none;
+}
+
+/* ---------------------- */
+/* LOADING STATES */
+/* ---------------------- */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+  height: 16px;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ---------------------- */
+/* RESPONSIVE BEHAVIOUR */
+/* ---------------------- */
+
+/* Mobile: sidebar hidden by default, slide-in when open */
+@media (max-width: 767px) {
+  .nandi-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .nandi-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+  }
+
+  .nandi-sidebar.closed {
+    transform: translateX(-100%);
+  }
+
+  .sidebar-backdrop {
+    display: block;
+  }
+
+  /* Adjust brand text for mobile */
+  .tenant-brand-text h4 {
+    font-size: 16px;
+  }
+
+  .tenant-brand-text span {
+    font-size: 11px;
+  }
+
+  .nandi-link {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Tablet & Desktop: sidebar always visible, no backdrop */
+@media (min-width: 768px) {
+  .nandi-sidebar {
+    transform: translateX(0);
+    box-shadow: none;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+  }
+}
+
+/* Large screens: subtle hover effects */
+@media (min-width: 1024px) {
+  .nandi-sidebar {
+    transition: all 0.3s ease;
+  }
+
+  .nandi-sidebar:hover {
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Animation for sidebar items */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.nandi-link {
+  animation: slideIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+.nandi-link:nth-child(1) { animation-delay: 0.05s; }
+.nandi-link:nth-child(2) { animation-delay: 0.1s; }
+.nandi-link:nth-child(3) { animation-delay: 0.15s; }
+.nandi-link:nth-child(4) { animation-delay: 0.2s; }
+.nandi-link:nth-child(5) { animation-delay: 0.25s; }
+.nandi-link:nth-child(6) { animation-delay: 0.3s; }
+.nandi-link:nth-child(7) { animation-delay: 0.35s; }
+.nandi-link:nth-child(8) { animation-delay: 0.4s; }
+.nandi-link:nth-child(9) { animation-delay: 0.45s; }
+.nandi-link:nth-child(10) { animation-delay: 0.5s; }
+.nandi-link:nth-child(11) { animation-delay: 0.55s; }
+.nandi-link:nth-child(12) { animation-delay: 0.6s; }
+
+/* ---------------------- */
+/* DARK MODE SUPPORT */
+/* ---------------------- */
+@media (prefers-color-scheme: dark) {
+  .nandi-sidebar {
+    background: #1a1a1a;
+    border-right-color: #333;
+    color: #ffffff !important;
+  }
+
+  .nandi-sidebar-header {
+    color: #ffffff !important;
+    border-bottom-color: #333;
+  }
+
+  .tenant-brand-text h4 {
+    color: #ffffff !important;
+  }
+
+  .tenant-brand-text span {
+    color: #ccc !important;
+  }
+
+  .tenant-box {
+    background: linear-gradient(135deg, #2d3748, #4a5568);
+    border-color: #4a5568;
+  }
+
+  .tenant-title {
+    color: #cbd5e0 !important;
+  }
+
+  .tenant-email {
+    color: #e2e8f0 !important;
+  }
+
+  .tenant-name {
+    color: #cbd5e0 !important;
+  }
+
+  .nandi-link {
+    color: #e2e8f0 !important;
+  }
+
+  .nandi-link:hover {
+    background: #2d3748;
+    color: #63b3ed !important;
+  }
+
+  .nandi-link.active {
+    background: #3182ce;
+    color: #ffffff !important;
+  }
+
+  .logout-btn {
+    background: #442222;
+    border-color: #742a2a;
+    color: #feb2b2 !important;
+  }
+
+  .logout-btn:hover {
+    background: #5c2a2a;
+  }
+
+  .copyright-text {
+    color: #a0aec0 !important;
+  }
+
+  .nandi-solutions-link {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #a3bffa !important;
+  }
+
+  .sidebar-toggle-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #ffffff;
+  }
+
+  .sidebar-toggle-btn:hover {
+    background: #4a5568;
+  }
+
+  .loading-skeleton {
+    background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%);
+  }
+}
+
+/* ---------------------- */
+/* ACCESSIBILITY */
+/* ---------------------- */
+.nandi-link:focus,
+.logout-btn:focus,
+.sidebar-toggle-btn:focus,
+.nandi-solutions-link:focus {
+  outline: 2px solid #0056e0;
+  outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .nandi-sidebar,
+  .nandi-link,
+  .logout-btn,
+  .sidebar-toggle-btn,
+  .nandi-solutions-link {
+    transition: none;
+    animation: none;
+  }
+  
+  .nandi-link {
+    opacity: 1;
+  }
+}

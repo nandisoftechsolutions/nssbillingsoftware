@@ -1,0 +1,222 @@
+/* ===============================
+   Nandi Billing – Register Page
+   Premium Gradient UI
+   =============================== */
+
+.nandiReg-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffe5cc, #fff8f0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+/* Card */
+.nandiReg-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 720px;
+  padding: 35px 40px;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  animation: fadeUp 0.4s ease;
+}
+
+/* Fade animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.nandiReg-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.nandiReg-logo {
+  width: 110px;
+  margin-bottom: 10px;
+}
+
+.nandiReg-title {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.nandiReg-subtitle {
+  color: #777;
+  font-size: 14px;
+}
+
+/* Error message */
+.nandiReg-error {
+  background: #ffe1e1;
+  color: #d60000;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+/* Section Title */
+.nandiReg-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  margin-top: 15px;
+}
+
+/* Plans Grid */
+.nandiReg-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: 25px;
+}
+
+/* Plan Card */
+.nandiReg-plan-card {
+  background: #fafafa;
+  border-radius: 15px;
+  padding: 20px 22px;
+  text-align: center;
+  transition: 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.nandiReg-plan-card:hover {
+  background: #ffffff;
+  transform: translateY(-4px);
+  border-color: #ff8c3f;
+  box-shadow: 0 8px 25px rgba(255, 140, 63, 0.15);
+}
+
+.nandiReg-selected {
+  border-color: #ff6f00 !important;
+  background: #fff7ec !important;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.25);
+}
+
+.nandiReg-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ff6f00;
+  margin: 10px 0 5px 0;
+}
+
+.nandiReg-duration {
+  font-size: 13px;
+  color: #666;
+}
+
+.nandiReg-desc {
+  font-size: 14px;
+  color: #777;
+  margin-top: 10px;
+}
+
+.nandiReg-badge {
+  margin-top: 10px;
+  display: inline-block;
+  background: #ff6f00;
+  color: #fff;
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Form */
+.nandiReg-input-group {
+  margin-bottom: 18px;
+}
+
+.nandiReg-input-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.nandiReg-input-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
+  background: #fff;
+  transition: 0.2s;
+  font-size: 15px;
+}
+
+.nandiReg-input-group input:focus {
+  border-color: #ff6f00;
+  box-shadow: 0 0 8px rgba(255, 140, 63, 0.25);
+  outline: none;
+}
+
+/* Button */
+.nandiReg-btn {
+  background: linear-gradient(135deg, #ff7a00, #ff9d3f);
+  color: white;
+  border: none;
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.25s ease;
+  margin-top: 8px;
+}
+
+.nandiReg-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(255, 140, 63, 0.35);
+}
+
+.nandiReg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Login Link */
+.nandiReg-login-text {
+  text-align: center;
+  margin-top: 15px;
+  color: #666;
+  font-size: 14px;
+}
+
+.nandiReg-login-link {
+  color: #ff6f00;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nandiReg-login-link:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  .nandiReg-card {
+    padding: 25px;
+  }
+
+  .nandiReg-title {
+    font-size: 24px;
+  }
+
+  .nandiReg-price {
+    font-size: 26px;
+  }
+}

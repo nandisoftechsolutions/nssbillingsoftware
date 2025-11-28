@@ -1,0 +1,532 @@
+/* src/components/AdminSidebar.css */
+
+/* ------------------------------------------
+   Nandi Admin Sidebar – Fully Responsive Design
+   ------------------------------------------ */
+
+/* Base Sidebar Styles */
+.nandi-admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;
+  height: 100vh;
+  background: #111827;
+  color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #1f2937;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Collapsed State */
+.nandi-admin-sidebar.collapsed {
+  width: 70px;
+}
+
+/* Header */
+.nandi-admin-sidebar-header {
+  padding: 1.25rem 1rem 1rem;
+  border-bottom: 1px solid #1f2937;
+  position: relative;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nandi-admin-sidebar-header-content {
+  text-align: center;
+  width: 100%;
+}
+
+.nandi-admin-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0 0 0.25rem 0;
+  color: #ffc107;
+  line-height: 1.2;
+}
+
+.nandi-admin-subtitle {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+/* Toggle Button */
+.nandi-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f3f4f6;
+  border: 1px solid #374151 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  font-weight: bold;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  line-height: 1;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.nandi-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: #4b5563 !important;
+}
+
+/* Navigation */
+.nandi-admin-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.75rem;
+  flex-grow: 1;
+  gap: 0.25rem;
+}
+
+.nandi-admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  color: #cbd5e1;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nandi-admin-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f9fafb;
+  transform: translateX(2px);
+}
+
+.nandi-admin-nav-link.active {
+  background: linear-gradient(135deg, #00b4d8, #48cae4);
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+}
+
+.nandi-admin-nav-icon {
+  font-size: 1.3rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.nandi-admin-nav-label {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tooltip for collapsed state */
+.nandi-tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  z-index: 1001;
+  border: 1px solid #374151;
+}
+
+.nandi-admin-nav-link:hover .nandi-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Footer */
+.nandi-admin-sidebar-footer {
+  padding: 1.25rem 1rem;
+  border-top: 1px solid #1f2937;
+  text-align: center;
+  background: #0f172a;
+}
+
+.nandi-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.nandi-logout-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.nandi-logout-icon {
+  font-size: 1.1rem;
+}
+
+.nandi-copyright {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  margin: 0.75rem 0 0 0;
+}
+
+/* Collapsed state styles */
+.nandi-admin-sidebar.collapsed .nandi-admin-sidebar-header-content,
+.nandi-admin-sidebar.collapsed .nandi-admin-nav-label,
+.nandi-admin-sidebar.collapsed .nandi-copyright {
+  display: none;
+}
+
+.nandi-admin-sidebar.collapsed .nandi-admin-nav-link {
+  justify-content: center;
+  gap: 0;
+  padding: 0.85rem;
+}
+
+.nandi-admin-sidebar.collapsed .nandi-admin-nav-icon {
+  font-size: 1.4rem;
+}
+
+.nandi-admin-sidebar.collapsed .nandi-logout-btn {
+  padding: 0.85rem;
+}
+
+/* Mobile Styles */
+.nandi-admin-sidebar.mobile {
+  width: 280px;
+  transform: translateX(-100%);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.nandi-admin-sidebar.mobile.mobile-open {
+  transform: translateX(0);
+}
+
+.nandi-admin-sidebar.mobile .nandi-admin-sidebar-header {
+  justify-content: flex-start;
+  text-align: left;
+  padding: 1rem;
+}
+
+.nandi-admin-sidebar.mobile .nandi-admin-sidebar-header-content {
+  text-align: left;
+}
+
+/* Mobile Header Bar */
+.nandi-mobile-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #111827;
+  border-bottom: 1px solid #1f2937;
+  z-index: 999;
+  padding: 0.75rem 1rem;
+}
+
+.nandi-mobile-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nandi-mobile-title {
+  color: #ffc107;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.nandi-mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Mobile Menu Button */
+.nandi-mobile-menu-btn {
+  background: transparent;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nandi-mobile-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #4b5563;
+}
+
+.nandi-hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 20px;
+  height: 16px;
+  position: relative;
+}
+
+.nandi-hamburger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: #f3f4f6;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+.nandi-hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.nandi-hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nandi-hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile Logout Button */
+.nandi-mobile-logout-btn {
+  background: transparent;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+}
+
+.nandi-mobile-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+}
+
+/* Mobile Overlay */
+.nandi-mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* Mobile Spacer */
+.nandi-mobile-spacer {
+  height: 60px;
+}
+
+/* Responsive Breakpoints */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .nandi-admin-sidebar:not(.mobile) {
+    width: 220px;
+  }
+  
+  .nandi-admin-sidebar.collapsed:not(.mobile) {
+    width: 65px;
+  }
+  
+  .nandi-admin-nav-link {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile Landscape (576px - 768px) */
+@media (max-width: 768px) {
+  .nandi-admin-sidebar:not(.mobile) {
+    transform: translateX(-100%);
+  }
+  
+  .nandi-admin-sidebar.mobile {
+    width: 300px;
+  }
+  
+  .nandi-mobile-header {
+    padding: 0.75rem 1rem;
+  }
+  
+  .nandi-mobile-title {
+    font-size: 1rem;
+  }
+}
+
+/* Mobile Portrait (480px - 576px) */
+@media (max-width: 576px) {
+  .nandi-admin-sidebar.mobile {
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .nandi-mobile-header {
+    padding: 0.75rem;
+  }
+  
+  .nandi-mobile-header-content {
+    gap: 0.75rem;
+  }
+  
+  .nandi-mobile-title {
+    font-size: 0.95rem;
+  }
+  
+  .nandi-admin-nav {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .nandi-admin-nav-link {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Small Mobile (320px - 480px) */
+@media (max-width: 480px) {
+  .nandi-admin-sidebar.mobile {
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .nandi-mobile-header {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .nandi-mobile-title {
+    font-size: 0.9rem;
+  }
+  
+  .nandi-admin-sidebar-header {
+    padding: 1rem 0.75rem;
+  }
+  
+  .nandi-admin-nav {
+    padding: 0.5rem;
+  }
+  
+  .nandi-admin-nav-link {
+    padding: 0.7rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .nandi-admin-nav-icon {
+    font-size: 1.2rem;
+  }
+}
+
+/* Extra Small Mobile (< 320px) */
+@media (max-width: 320px) {
+  .nandi-admin-sidebar.mobile {
+    width: 100%;
+  }
+  
+  .nandi-mobile-header-content {
+    gap: 0.5rem;
+  }
+  
+  .nandi-mobile-title {
+    font-size: 0.85rem;
+  }
+  
+  .nandi-admin-nav-link {
+    padding: 0.6rem 0.5rem;
+  }
+}
+
+/* High-resolution displays */
+@media (min-width: 1400px) {
+  .nandi-admin-sidebar:not(.mobile) {
+    width: 280px;
+  }
+  
+  .nandi-admin-sidebar.collapsed:not(.mobile) {
+    width: 75px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .nandi-admin-sidebar,
+  .nandi-mobile-header {
+    display: none !important;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .nandi-admin-sidebar,
+  .nandi-admin-nav-link,
+  .nandi-toggle-btn,
+  .nandi-logout-btn,
+  .nandi-hamburger span {
+    transition: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .nandi-admin-sidebar {
+    background: #111827;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .nandi-admin-nav-link:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .nandi-logout-btn:hover {
+    transform: none;
+  }
+  
+  .nandi-tooltip {
+    display: none;
+  }
+}

@@ -1,0 +1,264 @@
+/* Nandi Navbar - Compact & Smart Design */
+.nandi-navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 0.6rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+}
+
+/* Smart Logo Design with Image */
+.nandi-brand {
+  font-family: 'Arial', sans-serif;
+  text-decoration: none;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.nandi-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.nandi-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.nandi-logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.nandi-logo-main {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  background: linear-gradient(45deg, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.nandi-logo-sub {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.8px;
+  transition: all 0.3s ease;
+  line-height: 1.2;
+}
+
+.nandi-brand:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.nandi-brand:hover .nandi-logo-img {
+  transform: scale(1.05);
+}
+
+.nandi-brand:hover .nandi-logo-main {
+  background: linear-gradient(45deg, #ffd700, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nandi-brand:hover .nandi-logo-sub {
+  color: #ffd700;
+}
+
+/* Mobile Toggle */
+.nandi-toggler {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.3rem 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.nandi-toggler:focus {
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nandi-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+  transition: all 0.3s ease;
+}
+
+.nandi-toggler:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Navigation Links */
+.nandi-nav-links {
+  gap: 0.5rem;
+}
+
+.nandi-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  padding: 0.5rem 0.8rem !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.nandi-link:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+/* Active Link State */
+.nav-link.active {
+  color: #ffd700 !important;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Button Styles */
+.nandi-btn-outline,
+.nandi-btn-primary {
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1.5px solid;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.nandi-btn-outline {
+  color: white;
+  border-color: white;
+  background: transparent;
+}
+
+.nandi-btn-outline:hover {
+  background: white;
+  color: #667eea !important;
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.nandi-btn-primary {
+  color: white;
+  background: linear-gradient(135deg, #42b883, #2c974b);
+  border-color: transparent;
+}
+
+.nandi-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(66, 184, 131, 0.3);
+  color: white !important;
+  text-decoration: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+  .nandi-navbar {
+    padding: 0.5rem 0;
+  }
+
+  .nandi-nav-links {
+    text-align: center;
+    gap: 0.3rem;
+    padding: 1rem 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin-top: 0.8rem;
+  }
+
+  .nandi-link {
+    padding: 0.7rem 1rem !important;
+    margin: 0.1rem 0;
+    justify-content: center;
+  }
+
+  .nandi-btn-outline,
+  .nandi-btn-primary {
+    margin: 0.3rem 0;
+    width: 100%;
+    max-width: 180px;
+    justify-content: center;
+  }
+  
+  .nandi-logo-img {
+    height: 35px;
+  }
+  
+  .nandi-logo-main {
+    font-size: 1.4rem;
+  }
+  
+  .nandi-logo-sub {
+    font-size: 0.65rem;
+  }
+
+  .nandi-logo-container {
+    gap: 0.6rem;
+  }
+}
+
+/* Large screens optimization */
+@media (min-width: 1200px) {
+  .nandi-nav-links {
+    gap: 0.7rem;
+  }
+  
+  .nandi-link {
+    padding: 0.6rem 1rem !important;
+  }
+
+  .nandi-logo-img {
+    height: 45px;
+  }
+
+  .nandi-logo-main {
+    font-size: 1.8rem;
+  }
+
+  .nandi-logo-sub {
+    font-size: 0.75rem;
+  }
+}
+
+/* Focus states for accessibility */
+.nandi-link:focus,
+.nandi-btn-outline:focus,
+.nandi-btn-primary:focus {
+  outline: 2px solid #ffd700;
+  outline-offset: 2px;
+}
+
+/* Loading state for buttons */
+.nandi-btn-outline:disabled,
+.nandi-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

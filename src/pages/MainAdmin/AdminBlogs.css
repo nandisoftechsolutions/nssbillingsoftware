@@ -1,0 +1,442 @@
+/* ============================================================
+   AdminBlogs – Clean Professional SaaS Theme
+   Optimized & Lightweight Version
+   Author: ChatGPT
+   ============================================================ */
+
+/* Layout */
+.admin-blogs-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f7f9fc;
+}
+
+.admin-blogs-main {
+  flex: 1;
+  margin-left: 280px;
+  padding-bottom: 2rem;
+}
+
+/* ---------------- HEADER ------------------- */
+.admin-blogs-header {
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1.5rem 2rem;
+}
+
+.admin-blogs-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-blogs-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.admin-blogs-subtitle {
+  margin-top: 0.25rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* New Post Button */
+.admin-blogs-new-btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+.admin-blogs-new-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+/* ---------------- STAT CARDS ---------------- */
+.admin-blogs-stats {
+  padding: 1.7rem 2rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 1.3rem;
+  border-radius: 10px;
+  text-align: center;
+  transition: 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+}
+
+.stat-number {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stat-label {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* ---------------- FILTERS ---------------- */
+.admin-blogs-filters {
+  padding: 0 2rem 1.4rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-input,
+.filter-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 0.9rem;
+  transition: 0.2s ease;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  outline: none;
+}
+
+/* ---------------- MODAL ---------------- */
+.admin-blogs-form-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.admin-blogs-form-content {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Form Header */
+.admin-blogs-form-header {
+  padding: 1.4rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-blogs-form-close {
+  background: transparent;
+  border: none;
+  font-size: 1.7rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.2rem 0.5rem;
+  transition: 0.2s ease;
+}
+
+.admin-blogs-form-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* ---------------- FORM BODY ---------------- */
+.admin-blogs-form {
+  padding: 2rem;
+}
+
+.admin-blogs-form-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Inputs & Selects */
+.admin-blogs-form-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.admin-blogs-form-group input,
+.admin-blogs-form-group textarea,
+.admin-blogs-form-group select {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 0.9rem;
+  transition: 0.2s ease;
+}
+
+.admin-blogs-form-group input:focus,
+.admin-blogs-form-group textarea:focus,
+.admin-blogs-form-group select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  outline: none;
+}
+
+.html-editor-box {
+  padding: 1rem;
+  width: 100%;
+  font-family: monospace;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+/* ---------------- AD SPACES ---------------- */
+.adspace-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.ad-action-btn {
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s ease;
+}
+
+.ad-action-btn:hover {
+  background: #e5e7eb;
+}
+
+.ad-action-btn.secondary {
+  background: #6b7280;
+  color: #fff;
+  border-color: #6b7280;
+}
+
+.adspace-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.adspace-option {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.adspace-option:hover {
+  background: #f0f9ff;
+  border-color: #3b82f6;
+}
+
+/* ---------------- FORM ACTION BUTTONS ---------------- */
+.admin-blogs-form-actions {
+  margin-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.cancel-btn,
+.submit-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.submit-btn {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+/* ---------------- TABLE ---------------- */
+.admin-blogs-table-container {
+  padding: 0 2rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-blogs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-blogs-table th {
+  padding: 1rem;
+  text-align: left;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.admin-blogs-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.88rem;
+}
+
+/* Hover */
+.blog-row:hover {
+  background: #f9fafb;
+}
+
+/* Badges */
+.status-badge {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.published {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.draft {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.archived {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.category-tag {
+  padding: 0.35rem 0.7rem;
+  background: #e0f2fe;
+  color: #0369a1;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-btn { background: #3b82f6; color: #fff; }
+.edit-btn:hover { background: #2563eb; }
+
+.success-btn { background: #10b981; color: #fff; }
+.success-btn:hover { background: #059669; }
+
+.warn-btn { background: #f59e0b; color: #fff; }
+.warn-btn:hover { background: #d97706; }
+
+.danger-btn { background: #ef4444; color: #fff; }
+.danger-btn:hover { background: #dc2626; }
+
+/* ---------------- MOBILE CARD VIEW ---------------- */
+.mobile-cards-view {
+  display: none;
+  padding: 0 2rem;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.blog-mobile-card {
+  background: #fff;
+  padding: 1.3rem;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 1024px) {
+  .admin-blogs-main { margin-left: 0; }
+  .admin-blogs-form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .table-responsive { display: none; }
+  .mobile-cards-view { display: flex; }
+  .admin-blogs-form { padding: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .admin-blogs-header { padding: 1rem 1.4rem; }
+  .admin-blogs-title { font-size: 1.6rem; }
+  .admin-blogs-form-content { margin: 1rem; }
+}

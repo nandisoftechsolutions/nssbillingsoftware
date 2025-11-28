@@ -1,0 +1,340 @@
+/* General wrapper */
+.nandi-landing {
+  background-color: #f5f7fb;
+  color: #1f2933;
+}
+
+/* HERO SECTION */
+.nandi-hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 3rem 0 4rem;
+  color: #fff;
+}
+
+.nandi-hero-title span {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nandi-hero-sub {
+  font-size: 1.1rem;
+  color: #f8f9fa;
+  max-width: 560px;
+}
+
+.nandi-hero-sub strong {
+  color: #ffd700;
+}
+
+.nandi-cta-btn {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+}
+
+.nandi-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
+}
+
+.nandi-demo-btn {
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.nandi-demo-btn:hover {
+  background: #ffffff;
+  color: #667eea;
+  transform: translateY(-2px);
+}
+
+/* HERO IMAGE & PLAY BUTTON */
+.nandi-hero-media {
+  max-width: 520px;
+}
+
+.nandi-hero-image {
+  max-height: 480px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.nandi-play-btn {
+  width: 70px;
+  height: 70px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(255, 255, 255, 0.92) !important;
+  transition: all 0.25s ease;
+}
+
+.nandi-play-btn:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #ff0000 !important;
+  color: #ffffff;
+}
+
+/* STATS SECTION */
+.nandi-stats-section {
+  margin-top: -2.5rem;
+  padding: 2.5rem 0 3rem;
+}
+
+.nandi-stat-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  text-align: center;
+  padding: 1.4rem 0.8rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  transition: all 0.25s ease;
+}
+
+.nandi-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.nandi-stat-number {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #4c51bf;
+}
+
+.nandi-stat-label {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-top: 0.2rem;
+}
+
+/* WHY CHOOSE SECTION */
+.nandi-why {
+  padding: 4rem 0 4.5rem;
+  background: #f7f8ff;
+}
+
+.nandi-feature {
+  border-radius: 1.2rem;
+  background: #ffffff;
+}
+
+.nandi-feature-icon {
+  font-size: 2.4rem;
+}
+
+.hover-lift {
+  transition: all 0.25s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
+}
+
+/* SHOWCASE SECTION */
+.nandi-showcase {
+  padding: 4.5rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #ffffff;
+}
+
+.nandi-feature-list {
+  max-width: 480px;
+}
+
+.nandi-features-image {
+  max-width: 500px;
+  border-radius: 24px;
+}
+
+/* PRICING PREVIEW */
+.nandi-pricing-preview {
+  padding: 4rem 0 4.5rem;
+  background: #fdfdfd;
+}
+
+.nandi-pricing-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.4rem;
+}
+
+.nandi-popular-badge {
+  position: absolute;
+  top: 1rem;
+  right: -2rem;
+  background: #ffd700;
+  color: #000;
+  padding: 0.4rem 3rem;
+  transform: rotate(45deg);
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.nandi-price {
+  color: #111827;
+}
+
+/* TESTIMONIALS */
+.nandi-testimonials {
+  padding: 4rem 0 4.5rem;
+  background: #ffffff;
+}
+
+.nandi-testimonial {
+  border-radius: 1.2rem;
+  transition: all 0.25s ease;
+}
+
+.nandi-testimonial:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+}
+
+.nandi-stars {
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.nandi-avatar {
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
+}
+
+/* MOBILE / PWA SECTION */
+.nandi-mobile {
+  padding: 4rem 0 4.5rem;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+.nandi-pwa-demo {
+  position: relative;
+}
+
+.nandi-mobile-image {
+  max-width: 420px;
+  border-radius: 24px;
+}
+
+.nandi-pwa-badge {
+  animation: nandi-pulse 2s infinite;
+}
+
+@keyframes nandi-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.nandi-installation-steps,
+.nandi-app-features {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+
+/* FINAL CTA */
+.nandi-final-cta {
+  padding: 4rem 0 4.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .nandi-hero-section {
+    min-height: auto;
+    padding-top: 2.5rem;
+  }
+
+  .nandi-hero-title {
+    font-size: 2.3rem;
+  }
+
+  .nandi-hero-media {
+    max-width: 380px;
+  }
+
+  .nandi-hero-image {
+    max-height: 340px;
+  }
+
+  .nandi-showcase,
+  .nandi-pricing-preview,
+  .nandi-testimonials,
+  .nandi-mobile,
+  .nandi-final-cta,
+  .nandi-why {
+    padding: 3rem 0 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nandi-hero-title {
+    font-size: 2.1rem;
+  }
+
+  .nandi-hero-sub {
+    font-size: 1rem;
+  }
+
+  .nandi-stat-card {
+    padding: 1rem 0.6rem;
+  }
+
+  .nandi-installation-steps,
+  .nandi-app-features {
+    padding: 1rem;
+  }
+
+  .nandi-mobile .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nandi-features-image,
+  .nandi-mobile-image {
+    max-width: 100%;
+  }
+
+  .nandi-pricing-card .card-body {
+    padding: 2.5rem 1.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .nandi-stat-number {
+    font-size: 1.4rem;
+  }
+
+  .nandi-stat-label {
+    font-size: 0.8rem;
+  }
+
+  .nandi-hero-section {
+    padding-bottom: 3rem;
+  }
+}
