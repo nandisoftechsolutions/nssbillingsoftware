@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- HOME -->
   <url>
     <loc>https://nssbillingsoftware.vercel.app/</loc>
     <lastmod>2025-02-28</lastmod>
@@ -8,50 +9,57 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- FEATURES -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/features</loc>
+    <loc>https://nssbillingsoftware.vercel.app/features/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
+  <!-- PRICING -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/pricing</loc>
+    <loc>https://nssbillingsoftware.vercel.app/pricing/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
+  <!-- ABOUT -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/about</loc>
+    <loc>https://nssbillingsoftware.vercel.app/about/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
 
+  <!-- BLOG LIST -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/blog</loc>
+    <loc>https://nssbillingsoftware.vercel.app/blog/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
+  <!-- CONTACT -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/contact</loc>
+    <loc>https://nssbillingsoftware.vercel.app/contact/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
+  <!-- REGISTER -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/register</loc>
+    <loc>https://nssbillingsoftware.vercel.app/register/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
+  <!-- LOGIN -->
   <url>
-    <loc>https://nssbillingsoftware.vercel.app/login</loc>
+    <loc>https://nssbillingsoftware.vercel.app/login/</loc>
     <lastmod>2025-02-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
