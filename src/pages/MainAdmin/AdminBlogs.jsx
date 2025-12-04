@@ -1,9 +1,3 @@
-// src/pages/Admin/AdminBlogs.jsx
-// ------------------------------
-// PART 1 of 2
-// Optimized AdminBlogs with lazy-loaded editor (Mixed Theme ready)
-// ------------------------------
-
 import React, {
   useState,
   useEffect,
@@ -17,30 +11,29 @@ import AdminSidebar from "../../components/AdminSidebar";
 import api from "../../utils/api";
 import "./AdminBlogs.css";
 
-/**
- * IMPORTANT: We lazy-load the Jodit editor to reduce initial bundle size.
- * - Jodit will be imported only when the create/edit form is opened.
- * - Its CSS is also dynamically imported.
- */
+// Lazy load Jodit editor to reduce initial bundle size
 const LazyJoditEditor = React.lazy(() => import("jodit-react"));
 
-/* -------------------------
-   Helper small components
-   ------------------------- */
-
-const SmallStatCard = ({ number, label }) => (
-  <div className="admin-blogs-stat-card">
-    <div className="stat-number">{number}</div>
-    <div className="stat-label">{label}</div>
-  </div>
-);
-
-/* -------------------------
-   Main Component (Part 1)
-   ------------------------- */
+// Icon Components
+const BlogIcon = () => <span className="icon">📝</span>;
+const StatsIcon = () => <span className="icon">📊</span>;
+const PublishedIcon = () => <span className="icon">✅</span>;
+const ViewsIcon = () => <span className="icon">👁️</span>;
+const LikesIcon = () => <span className="icon">❤️</span>;
+const AdsIcon = () => <span className="icon">💰</span>;
+const PlusIcon = () => <span className="icon">➕</span>;
+const SearchIcon = () => <span className="icon">🔍</span>;
+const EditIcon = () => <span className="icon">✏️</span>;
+const DeleteIcon = () => <span className="icon">🗑️</span>;
+const CloseIcon = () => <span className="icon">×</span>;
+const CheckIcon = () => <span className="icon">✓</span>;
+const LoadingIcon = () => <span className="icon">⏳</span>;
+const FeaturedIcon = () => <span className="icon">⭐</span>;
+const DesignIcon = () => <span className="icon">🎨</span>;
+const CodeIcon = () => <span className="icon">📄</span>;
 
 const AdminBlogs = () => {
-  // Data states
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
@@ -50,16 +43,17 @@ const AdminBlogs = () => {
     totalLikes: 0,
   });
 
-  // UI states
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editorMode, setEditorMode] = useState("design");
-
-  // Editor dynamic loading flags
   const [editorLoaded, setEditorLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [expandedBlog, setExpandedBlog] = useState(null);
+
   const editorRef = useRef(null);
 
-  // Form data
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -84,15 +78,30 @@ const AdminBlogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
-
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const categories = useMemo(
-    () => ["General", "Technology", "Business", "Lifestyle", "Health", "Education"],
+    () => ["General", "Technology", "Business", "Lifestyle", "Health", "Education", "Finance", "Marketing"],
     []
   );
+
   const statusOptions = useMemo(() => ["draft", "published", "archived"], []);
 
+  // Detect screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Calculate ads enabled count
   const adsEnabledCount = useMemo(() => {
     return blogs.filter((blog) => {
       const a = blog.adSpaces || {};
@@ -100,6 +109,7 @@ const AdminBlogs = () => {
     }).length;
   }, [blogs]);
 
+  // Format date
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const d = new Date(dateString);
@@ -111,17 +121,26 @@ const AdminBlogs = () => {
     });
   };
 
-  /* -------------------------
-     Fetch data (blogs + stats)
-     ------------------------- */
+  // Format time
+  const formatTime = (dateString) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Fetch data
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      setErrorMessage("");
 
-      // Build query params more defensively
       const params = new URLSearchParams();
-      if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
-      if (categoryFilter && categoryFilter !== "all") params.append("category", categoryFilter);
+      if (statusFilter !== "all") params.append("status", statusFilter);
+      if (categoryFilter !== "all") params.append("category", categoryFilter);
       if (searchTerm.trim()) params.append("search", searchTerm.trim());
 
       const [blogsRes, statsRes] = await Promise.all([
@@ -136,12 +155,12 @@ const AdminBlogs = () => {
       }
 
       if (statsRes.data?.success && statsRes.data.data) {
-        setStats((prev) => ({ ...prev, ...statsRes.data.data }));
+        setStats(statsRes.data.data);
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      // keep alerts unobtrusive in admin; you can change to toast later
-      alert(err?.response?.data?.message || "Failed to fetch blog data");
+      setErrorMessage(err?.response?.data?.message || "Failed to fetch blog data");
+      setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setLoading(false);
     }
@@ -151,26 +170,21 @@ const AdminBlogs = () => {
     fetchData();
   }, [fetchData]);
 
-  /* -------------------------
-     Lazy-load editor CSS when form opens
-     ------------------------- */
+  // Lazy-load editor CSS
   useEffect(() => {
     if (showForm && !editorLoaded) {
-      // Dynamically import editor CSS so it's not in initial bundle
       import("jodit/es5/jodit.min.css")
         .then(() => {
           setEditorLoaded(true);
         })
         .catch((err) => {
           console.warn("Failed to load Jodit CSS:", err);
-          setEditorLoaded(true); // still allow lazy editor import attempt
+          setEditorLoaded(true);
         });
     }
   }, [showForm, editorLoaded]);
 
-  /* -------------------------
-     Form handlers
-     ------------------------- */
+  // Form handlers
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -226,6 +240,8 @@ const AdminBlogs = () => {
     setEditingId(null);
     setShowForm(false);
     setEditorMode("design");
+    setErrorMessage("");
+    setSuccessMessage("");
   };
 
   const handleEdit = (blog) => {
@@ -256,18 +272,18 @@ const AdminBlogs = () => {
       },
     });
 
-    // open form and lazy-load editor
     setEditingId(blog._id);
     setShowForm(true);
     setEditorMode("design");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  /* -------------------------
-     Submit handler (create/update)
-     ------------------------- */
+  // Submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
 
     try {
       const submitData = {
@@ -281,627 +297,845 @@ const AdminBlogs = () => {
       let response;
       if (editingId) {
         response = await api.put(`/admin/blogs/${editingId}`, submitData);
+        setSuccessMessage("✅ Blog updated successfully!");
       } else {
         response = await api.post("/admin/blogs", submitData);
+        setSuccessMessage("✅ Blog created successfully!");
       }
 
       if (response?.data?.success) {
-        alert(editingId ? "Blog updated successfully!" : "Blog created!");
         resetForm();
         fetchData();
-      } else {
-        alert("Failed to save blog");
+        setTimeout(() => setSuccessMessage(""), 3000);
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert(err?.response?.data?.message || "Failed to save blog");
+      setErrorMessage(err?.response?.data?.message || "Failed to save blog");
+      setTimeout(() => setErrorMessage(""), 5000);
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  // Delete blog
+  const handleDelete = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) return;
+
+    try {
+      setLoading(true);
+      const res = await api.delete(`/admin/blogs/${id}`);
+      if (res.data?.success) {
+        setSuccessMessage("🗑️ Blog deleted successfully!");
+        fetchData();
+        setTimeout(() => setSuccessMessage(""), 3000);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      setErrorMessage("❌ Failed to delete blog");
+      setTimeout(() => setErrorMessage(""), 5000);
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------
-     Delete & status toggle
-     ------------------------- */
-  const handleDelete = async (id, title) => {
-    if (!window.confirm(`Delete "${title}" ?`)) return;
-
-    try {
-      const res = await api.delete(`/admin/blogs/${id}`);
-      if (res.data?.success) {
-        alert("Blog deleted!");
-        fetchData();
-      } else {
-        alert("Failed to delete");
-      }
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert(err?.response?.data?.message || "Delete error");
-    }
-  };
-
+  // Toggle blog status
   const toggleStatus = async (blog, newStatus) => {
     try {
+      setLoading(true);
       const res = await api.put(`/admin/blogs/${blog._id}`, { status: newStatus });
       if (res.data?.success) {
-        alert(`Blog ${newStatus} successfully!`);
+        setSuccessMessage(`✅ Blog ${newStatus} successfully!`);
         fetchData();
-      } else {
-        alert("Failed to update status");
+        setTimeout(() => setSuccessMessage(""), 3000);
       }
     } catch (err) {
       console.error("Toggle status error:", err);
-      alert(err?.response?.data?.message || "Update error");
+      setErrorMessage("❌ Failed to update status");
+      setTimeout(() => setErrorMessage(""), 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
-  /* -------------------------
-     End of PART 1
-     (Next message contains the JSX render + smaller subcomponents for table & form UI + export)
-     ------------------------- */
-/* -------------------------
-   PART 2 — JSX Render + Final Export
-   ------------------------- */
+  // Toggle blog expansion on mobile
+  const toggleBlogExpansion = (blogId) => {
+    setExpandedBlog(expandedBlog === blogId ? null : blogId);
+  };
+
+  // Filter blogs based on search
+  const filteredBlogs = blogs.filter(blog =>
+    blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    blog.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    blog.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    blog.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="admin-blogs-layout">
+    <div className="admin-blogs-container">
       <AdminSidebar />
-
+      
       <main className="admin-blogs-main">
-        {/* Header */}
+        {/* Header Section */}
         <header className="admin-blogs-header">
-          <div className="admin-blogs-header-content">
-            <div className="admin-blogs-header-text">
-              <h1 className="admin-blogs-title">Blog Management</h1>
-              <p className="admin-blogs-subtitle">
-                Write, edit & manage your blog posts
-              </p>
+          <div className="header-content">
+            <div className="header-left">
+              <div className="breadcrumb">
+                <span onClick={() => navigate("/admin/dashboard")}>Dashboard</span>
+                <span className="separator">/</span>
+                <span className="current">Blog Management</span>
+              </div>
+              <div className="header-title">
+                <h1><BlogIcon /> Blog Management</h1>
+                <p className="subtitle">Create, edit, and manage your blog content</p>
+              </div>
             </div>
+            <div className="header-right">
+              <button
+                className="btn btn-primary new-post-btn"
+                onClick={() => setShowForm(true)}
+              >
+                <PlusIcon /> {!isMobile && 'New Post'}
+              </button>
+            </div>
+          </div>
 
-            <button
-              className="admin-blogs-new-btn"
-              onClick={() => setShowForm(true)}
-            >
-              <span className="btn-icon">+</span>
-              New Blog Post
-            </button>
+          {/* Stats Overview */}
+          <div className="header-stats">
+            <div className="stat-card">
+              <div className="stat-icon primary">
+                <StatsIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{stats.total}</h3>
+                <p>Total Posts</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon success">
+                <PublishedIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{stats.published}</h3>
+                <p>Published</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon info">
+                <ViewsIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{stats.totalViews}</h3>
+                <p>Total Views</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon warning">
+                <LikesIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{stats.totalLikes}</h3>
+                <p>Total Likes</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon purple">
+                <AdsIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{adsEnabledCount}</h3>
+                <p>Ads Enabled</p>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Stats */}
-        <div className="admin-blogs-stats">
-          <SmallStatCard number={stats.total} label="Total Posts" />
-          <SmallStatCard number={stats.published} label="Published" />
-          <SmallStatCard number={stats.totalViews} label="Total Views" />
-          <SmallStatCard number={stats.totalLikes} label="Total Likes" />
-          <SmallStatCard number={adsEnabledCount} label="Ads Enabled" />
-        </div>
-
-        {/* Filters */}
-        <div className="admin-blogs-filters">
-          <div className="filter-group">
-            <input
-              type="text"
-              placeholder="Search blogs..."
-              className="search-input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="filter-group">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Status</option>
-              <option value="published">Published</option>
-              <option value="draft">Draft</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Categories</option>
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Blog Form Modal */}
-        {showForm && (
-          <div className="admin-blogs-form-modal">
-            <div className="admin-blogs-form-content">
-              <div className="admin-blogs-form-header">
-                <h3>{editingId ? "Edit Blog Post" : "Create New Blog Post"}</h3>
-
-                <button
-                  className="admin-blogs-form-close"
-                  onClick={resetForm}
-                  aria-label="Close form"
-                >
-                  ×
-                </button>
+        {/* Alerts */}
+        <div className="alerts-container">
+          {errorMessage && (
+            <div className="alert alert-error slide-in">
+              <div className="alert-content">
+                <span className="icon">❌</span>
+                <span>{errorMessage}</span>
               </div>
+              <button className="alert-close" onClick={() => setErrorMessage("")}>
+                <CloseIcon />
+              </button>
+            </div>
+          )}
+          
+          {successMessage && (
+            <div className="alert alert-success slide-in">
+              <div className="alert-content">
+                <span className="icon">✅</span>
+                <span>{successMessage}</span>
+              </div>
+              <button className="alert-close" onClick={() => setSuccessMessage("")}>
+                <CloseIcon />
+              </button>
+            </div>
+          )}
+        </div>
 
-              {/* FORM */}
-              <form onSubmit={handleSubmit} className="admin-blogs-form">
-                <div className="admin-blogs-form-grid">
+        <div className="admin-blogs-content">
+          {/* Filters and Search */}
+          <div className="content-header">
+            <div className="filters-container">
+              <div className="search-box">
+                <SearchIcon />
+                <input
+                  type="text"
+                  placeholder="Search posts by title, tags, or category..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+                {searchTerm && (
+                  <button 
+                    className="clear-search"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    <CloseIcon />
+                  </button>
+                )}
+              </div>
+              
+              <div className="filter-buttons">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="all">All Status</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+                
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
 
-                  {/* Title */}
-                  <div className="admin-blogs-form-group full-width">
-                    <label>Title *</label>
-                    <input
-                      type="text"
-                      name="title"
-                      required
-                      value={formData.title}
-                      onChange={handleInputChange}
-                    />
+          {/* Loading State */}
+          {loading && (
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <p>Loading blog posts...</p>
+            </div>
+          )}
+
+          {/* Blog Form Modal */}
+          {showForm && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h3 className="modal-title">
+                    {editingId ? '✏️ Edit Blog Post' : '➕ Create New Post'}
+                  </h3>
+                  <button className="modal-close" onClick={resetForm}>
+                    <CloseIcon />
+                  </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="blog-form">
+                  {/* Form Sections */}
+                  <div className="form-section">
+                    <h4 className="section-title">Basic Information</h4>
+                    <div className="form-grid">
+                      <div className="form-group full-width">
+                        <label className="form-label required">Title</label>
+                        <input
+                          type="text"
+                          name="title"
+                          value={formData.title}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          placeholder="Enter blog post title"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group full-width">
+                        <label className="form-label required">Excerpt</label>
+                        <textarea
+                          name="excerpt"
+                          value={formData.excerpt}
+                          onChange={handleInputChange}
+                          className="form-textarea"
+                          placeholder="Brief description of the post"
+                          rows="3"
+                          required
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Excerpt */}
-                  <div className="admin-blogs-form-group full-width">
-                    <label>Excerpt *</label>
-                    <textarea
-                      rows="3"
-                      name="excerpt"
-                      required
-                      value={formData.excerpt}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  {/* Content (Lazy Loaded Editor) */}
-                  <div className="admin-blogs-form-group full-width">
-                    <label>Content *</label>
-
-                    <div className="editor-mode-toggle">
+                  {/* Content Editor */}
+                  <div className="form-section">
+                    <h4 className="section-title">Content</h4>
+                    <div className="editor-switcher">
                       <button
                         type="button"
-                        className={`mode-btn ${
-                          editorMode === "design" ? "active" : ""
-                        }`}
-                        onClick={() => setEditorMode("design")}
+                        className={`editor-tab ${editorMode === 'design' ? 'active' : ''}`}
+                        onClick={() => setEditorMode('design')}
                       >
-                        Design Mode
+                        <DesignIcon /> Visual Editor
                       </button>
-
                       <button
                         type="button"
-                        className={`mode-btn ${
-                          editorMode === "html" ? "active" : ""
-                        }`}
-                        onClick={() => setEditorMode("html")}
+                        className={`editor-tab ${editorMode === 'html' ? 'active' : ''}`}
+                        onClick={() => setEditorMode('html')}
                       >
-                        HTML Mode
+                        <CodeIcon /> HTML Editor
                       </button>
                     </div>
 
-                    {/* DESIGN MODE */}
-                    {editorMode === "design" ? (
-                      <div className="editor-container">
-                        {editorLoaded ? (
-                          <Suspense fallback={<div>Loading editor...</div>}>
+                    <div className="editor-container">
+                      {editorMode === 'design' ? (
+                        editorLoaded ? (
+                          <Suspense fallback={
+                            <div className="editor-loading">
+                              <div className="loading-spinner"></div>
+                              <p>Loading editor...</p>
+                            </div>
+                          }>
                             <LazyJoditEditor
                               ref={editorRef}
                               value={formData.content}
                               onChange={(newContent) =>
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  content: newContent,
-                                }))
+                                setFormData(prev => ({ ...prev, content: newContent }))
                               }
+                              config={{
+                                height: 400,
+                                toolbarAdaptive: false,
+                                buttons: 'bold,italic,underline,strikethrough,|,ul,ol,|,font,fontsize,|,image,video,link,|,align,undo,redo'
+                              }}
                             />
                           </Suspense>
                         ) : (
-                          <div className="loading-state">
-                            <div className="loading-spinner large"></div>
-                            <p>Loading editor…</p>
+                          <div className="editor-loading">
+                            <div className="loading-spinner"></div>
+                            <p>Loading editor...</p>
                           </div>
-                        )}
-                      </div>
-                    ) : (
-                      /* HTML MODE */
-                      <textarea
-                        className="html-editor-box"
-                        value={formData.content}
-                        onChange={(e) =>
-                          setFormData({ ...formData, content: e.target.value })
-                        }
-                        rows="12"
-                      />
-                    )}
-                  </div>
-
-                  {/* Featured Image */}
-                  <div className="admin-blogs-form-group">
-                    <label>Featured Image URL</label>
-                    <input
-                      type="text"
-                      name="featuredImage"
-                      value={formData.featuredImage}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  {/* Author */}
-                  <div className="admin-blogs-form-group">
-                    <label>Author</label>
-                    <input
-                      type="text"
-                      name="author"
-                      value={formData.author}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  {/* Tags */}
-                  <div className="admin-blogs-form-group">
-                    <label>Tags</label>
-                    <input
-                      type="text"
-                      name="tags"
-                      value={formData.tags}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  {/* Category */}
-                  <div className="admin-blogs-form-group">
-                    <label>Category</label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                    >
-                      {categories.map((c) => (
-                        <option key={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Status */}
-                  <div className="admin-blogs-form-group">
-                    <label>Status</label>
-                    <select
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                    >
-                      {statusOptions.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Featured Toggle */}
-                  <div className="admin-blogs-form-group">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        name="isFeatured"
-                        checked={formData.isFeatured}
-                        onChange={handleInputChange}
-                      />
-                      <span className="checkmark"></span>
-                      Mark as Featured
-                    </label>
-                  </div>
-
-                  {/* Ad Spaces */}
-                  <div className="admin-blogs-form-group full-width">
-                    <label>Ad Spaces</label>
-
-                    <div className="adspace-actions">
-                      <button
-                        type="button"
-                        className="ad-action-btn"
-                        onClick={() => toggleAllAds(true)}
-                      >
-                        Enable All
-                      </button>
-                      <button
-                        type="button"
-                        className="ad-action-btn secondary"
-                        onClick={() => toggleAllAds(false)}
-                      >
-                        Disable All
-                      </button>
-                    </div>
-
-                    <div className="adspace-grid">
-                      {["headerAd", "sidebarAd", "inContentAd", "footerAd"].map(
-                        (ad) => (
-                          <label key={ad} className="adspace-option">
-                            <input
-                              type="checkbox"
-                              name={`adSpaces.${ad}`}
-                              checked={formData.adSpaces[ad]}
-                              onChange={handleInputChange}
-                            />
-                            <span className="adspace-checkmark"></span>
-                            <span className="adspace-label">
-                              {ad.replace(/([A-Z])/g, " $1")}
-                            </span>
-                          </label>
                         )
+                      ) : (
+                        <textarea
+                          className="html-editor"
+                          value={formData.content}
+                          onChange={(e) =>
+                            setFormData(prev => ({ ...prev, content: e.target.value }))
+                          }
+                          rows="15"
+                          placeholder="Enter HTML content here..."
+                        />
                       )}
                     </div>
                   </div>
-                </div>
 
-                {/* Form Actions */}
-                <div className="admin-blogs-form-actions">
-                  <button
-                    type="button"
-                    className="cancel-btn"
-                    onClick={resetForm}
-                  >
-                    Cancel
-                  </button>
-
-                  <button type="submit" className="submit-btn" disabled={loading}>
-                    {loading ? (
-                      <span className="loading-spinner"></span>
-                    ) : editingId ? (
-                      "Update Blog"
-                    ) : (
-                      "Create Blog"
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Blog Table */}
-        <div className="admin-blogs-table-container">
-          {loading ? (
-            <div className="loading-state">
-              <div className="loading-spinner large"></div>
-              <p>Loading blog posts...</p>
-            </div>
-          ) : blogs.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-icon">📝</div>
-              <h3>No blog posts found</h3>
-              <p>Start by creating a new post</p>
-              <button
-                className="create-first-btn"
-                onClick={() => setShowForm(true)}
-              >
-                Create Your First Post
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* TABLE (Desktop) */}
-              <div className="table-responsive">
-                <table className="admin-blogs-table">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th className="hide-mobile">Category</th>
-                      <th>Status</th>
-                      <th className="hide-tablet">Ads</th>
-                      <th className="hide-mobile">Views</th>
-                      <th className="hide-mobile">Likes</th>
-                      <th className="hide-tablet">Published</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {blogs.map((blog) => {
-                      const a = blog.adSpaces || {};
-                      const hasAd =
-                        a.headerAd || a.sidebarAd || a.inContentAd || a.footerAd;
-
-                      return (
-                        <tr key={blog._id} className="blog-row">
-                          <td className="blog-title-cell">
-                            <div className="blog-title-content">
-                              <span className="blog-title">{blog.title}</span>
-                              {blog.isFeatured && (
-                                <span className="featured-badge">★</span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="hide-mobile">
-                            <span className="category-tag">{blog.category}</span>
-                          </td>
-
-                          <td>
-                            <span
-                              className={`status-badge ${blog.status}`}
-                            >
-                              {blog.status}
-                            </span>
-                          </td>
-
-                          <td className="hide-tablet">
-                            <span
-                              className={`ad-indicator ${
-                                hasAd ? "enabled" : "disabled"
-                              }`}
-                            >
-                              {hasAd ? "✓" : "✗"}
-                            </span>
-                          </td>
-
-                          <td className="hide-mobile">
-                            <span className="count-number">
-                              {blog.views || 0}
-                            </span>
-                          </td>
-
-                          <td className="hide-mobile">
-                            <span className="count-number">
-                              {blog.likes || 0}
-                            </span>
-                          </td>
-
-                          <td className="hide-tablet">
-                            <span className="date-text">
-                              {formatDate(blog.publishedAt)}
-                            </span>
-                          </td>
-
-                          <td>
-                            <div className="table-actions">
-                              <button
-                                className="action-btn edit-btn"
-                                onClick={() => handleEdit(blog)}
-                              >
-                                Edit
-                              </button>
-
-                              <div className="action-group">
-                                {blog.status === "published" ? (
-                                  <button
-                                    className="action-btn warn-btn"
-                                    onClick={() =>
-                                      toggleStatus(blog, "draft")
-                                    }
-                                  >
-                                    Unpublish
-                                  </button>
-                                ) : (
-                                  <button
-                                    className="action-btn success-btn"
-                                    onClick={() =>
-                                      toggleStatus(blog, "published")
-                                    }
-                                  >
-                                    Publish
-                                  </button>
-                                )}
-
-                                <button
-                                  className="action-btn danger-btn"
-                                  onClick={() =>
-                                    handleDelete(blog._id, blog.title)
-                                  }
-                                >
-                                  Delete
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* MOBILE CARDS VIEW */}
-              <div className="mobile-cards-view">
-                {blogs.map((blog) => {
-                  const a = blog.adSpaces || {};
-                  const hasAd =
-                    a.headerAd || a.sidebarAd || a.inContentAd || a.footerAd;
-
-                  return (
-                    <div key={blog._id} className="blog-mobile-card">
-                      <div className="card-header">
-                        <h4 className="card-title">
-                          {blog.title}
-                          {blog.isFeatured && (
-                            <span className="featured-badge">★</span>
-                          )}
-                        </h4>
-                        <span className={`status-badge ${blog.status}`}>
-                          {blog.status}
-                        </span>
+                  {/* Additional Information */}
+                  <div className="form-section">
+                    <h4 className="section-title">Additional Information</h4>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label className="form-label">Featured Image URL</label>
+                        <input
+                          type="text"
+                          name="featuredImage"
+                          value={formData.featuredImage}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          placeholder="https://example.com/image.jpg"
+                        />
                       </div>
 
-                      <div className="card-meta">
-                        <span className="meta-item">
-                          <strong>Category:</strong> {blog.category}
-                        </span>
+                      <div className="form-group">
+                        <label className="form-label">Author</label>
+                        <input
+                          type="text"
+                          name="author"
+                          value={formData.author}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          placeholder="Author name"
+                        />
+                      </div>
 
-                        <span className="meta-item">
-                          <strong>Ads:</strong>{" "}
-                          <span
-                            className={`ad-indicator ${
-                              hasAd ? "enabled" : "disabled"
-                            }`}
-                          >
-                            {hasAd ? "Enabled" : "Disabled"}
+                      <div className="form-group">
+                        <label className="form-label">Tags</label>
+                        <input
+                          type="text"
+                          name="tags"
+                          value={formData.tags}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          placeholder="tech, business, marketing (comma separated)"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Category</label>
+                        <select
+                          name="category"
+                          value={formData.category}
+                          onChange={handleInputChange}
+                          className="form-select"
+                        >
+                          {categories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Status</label>
+                        <select
+                          name="status"
+                          value={formData.status}
+                          onChange={handleInputChange}
+                          className="form-select"
+                        >
+                          {statusOptions.map((status) => (
+                            <option key={status} value={status}>
+                              {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Featured</label>
+                        <label className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            name="isFeatured"
+                            checked={formData.isFeatured}
+                            onChange={handleInputChange}
+                            className="toggle-input"
+                          />
+                          <span className="toggle-slider"></span>
+                          <span className="toggle-label">
+                            {formData.isFeatured ? 'Featured' : 'Not Featured'}
                           </span>
-                        </span>
-
-                        <span className="meta-item">
-                          <strong>Views:</strong> {blog.views || 0}
-                        </span>
-
-                        <span className="meta-item">
-                          <strong>Likes:</strong> {blog.likes || 0}
-                        </span>
-
-                        <span className="meta-item">
-                          <strong>Published:</strong>{" "}
-                          {formatDate(blog.publishedAt)}
-                        </span>
+                        </label>
                       </div>
+                    </div>
+                  </div>
 
-                      <div className="card-actions">
+                  {/* Ad Spaces */}
+                  <div className="form-section">
+                    <div className="section-header">
+                      <h4 className="section-title">Ad Spaces</h4>
+                      <div className="ad-controls">
                         <button
-                          className="action-btn edit-btn"
-                          onClick={() => handleEdit(blog)}
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => toggleAllAds(true)}
                         >
-                          Edit
+                          Enable All
                         </button>
-
-                        {blog.status === "published" ? (
-                          <button
-                            className="action-btn warn-btn"
-                            onClick={() => toggleStatus(blog, "draft")}
-                          >
-                            Unpublish
-                          </button>
-                        ) : (
-                          <button
-                            className="action-btn success-btn"
-                            onClick={() =>
-                              toggleStatus(blog, "published")
-                            }
-                          >
-                            Publish
-                          </button>
-                        )}
-
                         <button
-                          className="action-btn danger-btn"
-                          onClick={() =>
-                            handleDelete(blog._id, blog.title)
-                          }
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => toggleAllAds(false)}
                         >
-                          Delete
+                          Disable All
                         </button>
                       </div>
                     </div>
-                  );
-                })}
+                    
+                    <div className="ad-grid">
+                      {['headerAd', 'sidebarAd', 'inContentAd', 'footerAd'].map((ad) => (
+                        <label key={ad} className="ad-option">
+                          <input
+                            type="checkbox"
+                            name={`adSpaces.${ad}`}
+                            checked={formData.adSpaces[ad]}
+                            onChange={handleInputChange}
+                            className="ad-checkbox"
+                          />
+                          <span className="ad-checkmark"></span>
+                          <span className="ad-label">
+                            {ad.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SEO Information */}
+                  <div className="form-section">
+                    <h4 className="section-title">SEO Information</h4>
+                    <div className="form-grid">
+                      <div className="form-group">
+                        <label className="form-label">Meta Title</label>
+                        <input
+                          type="text"
+                          name="metaTitle"
+                          value={formData.metaTitle}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          placeholder="SEO title"
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">Meta Description</label>
+                        <textarea
+                          name="metaDescription"
+                          value={formData.metaDescription}
+                          onChange={handleInputChange}
+                          className="form-textarea"
+                          placeholder="SEO description"
+                          rows="2"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Actions */}
+                  <div className="form-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary cancel-btn"
+                      onClick={resetForm}
+                      disabled={formLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary submit-btn"
+                      disabled={formLoading}
+                    >
+                      {formLoading ? (
+                        <>
+                          <LoadingIcon /> Saving...
+                        </>
+                      ) : editingId ? (
+                        'Update Post'
+                      ) : (
+                        'Create Post'
+                      )}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </>
+            </div>
           )}
+
+          {/* Blog Posts List */}
+          <div className="blogs-section">
+            {filteredBlogs.length === 0 && !loading ? (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <BlogIcon />
+                </div>
+                <h3>{searchTerm ? 'No Matching Posts' : 'No Blog Posts Yet'}</h3>
+                <p>
+                  {searchTerm 
+                    ? 'Try a different search term'
+                    : 'Start writing your first blog post'
+                  }
+                </p>
+                {!searchTerm && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => setShowForm(true)}
+                  >
+                    <PlusIcon /> Create First Post
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Mobile/Tablet Cards View */}
+                {(isMobile || isTablet) && (
+                  <div className="blog-cards">
+                    {filteredBlogs.map((blog) => {
+                      const a = blog.adSpaces || {};
+                      const hasAd = a.headerAd || a.sidebarAd || a.inContentAd || a.footerAd;
+                      
+                      return (
+                        <div 
+                          key={blog._id} 
+                          className={`blog-card ${!blog.isActive ? 'inactive' : ''} ${expandedBlog === blog._id ? 'expanded' : ''}`}
+                          onClick={() => isMobile && toggleBlogExpansion(blog._id)}
+                        >
+                          <div className="card-header">
+                            <div className="blog-info">
+                              <h4 className="blog-title">
+                                {blog.title}
+                                {blog.isFeatured && (
+                                  <span className="featured-badge">
+                                    <FeaturedIcon /> Featured
+                                  </span>
+                                )}
+                              </h4>
+                              <div className="blog-meta">
+                                <span className="blog-category">{blog.category}</span>
+                                <span className="blog-date">{formatDate(blog.createdAt)}</span>
+                              </div>
+                            </div>
+                            <span className={`status-badge ${blog.status}`}>
+                              {blog.status}
+                            </span>
+                          </div>
+
+                          <div className="card-body">
+                            <p className="blog-excerpt">{blog.excerpt}</p>
+                            
+                            {(expandedBlog === blog._id || !isMobile) && (
+                              <>
+                                <div className="blog-stats">
+                                  <div className="stat-item">
+                                    <span className="stat-label">Views:</span>
+                                    <span className="stat-value">{blog.views || 0}</span>
+                                  </div>
+                                  <div className="stat-item">
+                                    <span className="stat-label">Likes:</span>
+                                    <span className="stat-value">{blog.likes || 0}</span>
+                                  </div>
+                                  <div className="stat-item">
+                                    <span className="stat-label">Ads:</span>
+                                    <span className={`stat-value ${hasAd ? 'enabled' : 'disabled'}`}>
+                                      {hasAd ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {blog.tags?.length > 0 && (
+                                  <div className="blog-tags">
+                                    {blog.tags.slice(0, 3).map((tag, idx) => (
+                                      <span key={idx} className="tag">{tag}</span>
+                                    ))}
+                                    {blog.tags.length > 3 && (
+                                      <span className="tag-more">+{blog.tags.length - 3}</span>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+
+                          <div className="card-actions">
+                            <div className="action-buttons">
+                              <button
+                                className="btn-icon btn-edit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(blog);
+                                }}
+                                title="Edit Post"
+                                disabled={loading}
+                              >
+                                <EditIcon />
+                              </button>
+                              {blog.status === 'published' ? (
+                                <button
+                                  className="btn-icon btn-warning"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleStatus(blog, 'draft');
+                                  }}
+                                  title="Unpublish"
+                                  disabled={loading}
+                                >
+                                  Unpublish
+                                </button>
+                              ) : (
+                                <button
+                                  className="btn-icon btn-success"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleStatus(blog, 'published');
+                                  }}
+                                  title="Publish"
+                                  disabled={loading}
+                                >
+                                  Publish
+                                </button>
+                              )}
+                              <button
+                                className="btn-icon btn-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(blog._id, blog.title);
+                                }}
+                                title="Delete Post"
+                                disabled={loading}
+                              >
+                                <DeleteIcon />
+                              </button>
+                              {isMobile && (
+                                <button
+                                  className="btn-icon btn-expand"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleBlogExpansion(blog._id);
+                                  }}
+                                  title={expandedBlog === blog._id ? 'Collapse' : 'Expand'}
+                                >
+                                  {expandedBlog === blog._id ? '▲' : '▼'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Desktop Table View */}
+                {!isMobile && !isTablet && (
+                  <div className="blogs-table-container">
+                    <div className="table-responsive">
+                      <table className="blogs-table">
+                        <thead>
+                          <tr>
+                            <th>Post</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Ads</th>
+                            <th>Views</th>
+                            <th>Likes</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredBlogs.map((blog) => {
+                            const a = blog.adSpaces || {};
+                            const hasAd = a.headerAd || a.sidebarAd || a.inContentAd || a.footerAd;
+                            
+                            return (
+                              <tr key={blog._id} className={!blog.isActive ? 'inactive' : ''}>
+                                <td className="post-cell">
+                                  <div className="post-info">
+                                    <div className="post-title">
+                                      {blog.title}
+                                      {blog.isFeatured && (
+                                        <span className="featured-indicator">
+                                          <FeaturedIcon />
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="post-excerpt">{blog.excerpt}</div>
+                                    <div className="post-meta">
+                                      <span className="author">{blog.author}</span>
+                                      {blog.tags?.slice(0, 2).map((tag, idx) => (
+                                        <span key={idx} className="tag">{tag}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="category-cell">
+                                  <span className="category-badge">{blog.category}</span>
+                                </td>
+                                <td className="status-cell">
+                                  <span className={`status-badge ${blog.status}`}>
+                                    {blog.status}
+                                  </span>
+                                </td>
+                                <td className="ads-cell">
+                                  <span className={`ad-indicator ${hasAd ? 'enabled' : 'disabled'}`}>
+                                    {hasAd ? <CheckIcon /> : <CloseIcon />}
+                                  </span>
+                                </td>
+                                <td className="views-cell">
+                                  <span className="count">{blog.views || 0}</span>
+                                </td>
+                                <td className="likes-cell">
+                                  <span className="count">{blog.likes || 0}</span>
+                                </td>
+                                <td className="date-cell">
+                                  <div className="date-info">
+                                    <div>{formatDate(blog.createdAt)}</div>
+                                    <div className="time">{formatTime(blog.createdAt)}</div>
+                                  </div>
+                                </td>
+                                <td className="actions-cell">
+                                  <div className="action-buttons">
+                                    <button
+                                      className="btn-icon btn-edit"
+                                      onClick={() => handleEdit(blog)}
+                                      title="Edit Post"
+                                      disabled={loading}
+                                    >
+                                      <EditIcon />
+                                    </button>
+                                    {blog.status === 'published' ? (
+                                      <button
+                                        className="btn-icon btn-warning"
+                                        onClick={() => toggleStatus(blog, 'draft')}
+                                        title="Unpublish"
+                                        disabled={loading}
+                                      >
+                                        Unpublish
+                                      </button>
+                                    ) : (
+                                      <button
+                                        className="btn-icon btn-success"
+                                        onClick={() => toggleStatus(blog, 'published')}
+                                        title="Publish"
+                                        disabled={loading}
+                                      >
+                                        Publish
+                                      </button>
+                                    )}
+                                    <button
+                                      className="btn-icon btn-delete"
+                                      onClick={() => handleDelete(blog._id, blog.title)}
+                                      title="Delete Post"
+                                      disabled={loading}
+                                    >
+                                      <DeleteIcon />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Table Summary */}
+                {filteredBlogs.length > 0 && (
+                  <div className="table-summary">
+                    <div className="summary-info">
+                      Showing {filteredBlogs.length} of {blogs.length} posts
+                    </div>
+                    <button 
+                      className="btn btn-primary"
+                      onClick={() => setShowForm(true)}
+                    >
+                      <PlusIcon /> Create New Post
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </main>
     </div>

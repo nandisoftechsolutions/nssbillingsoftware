@@ -1,0 +1,76 @@
+/* src/pages/Admin/AdminRatingManage.css */
+
+/* Custom scrollbar */
+.MuiTableContainer-root::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.MuiTableContainer-root::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.MuiTableContainer-root::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.MuiTableContainer-root::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Status badge animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.MuiChip-root.MuiChip-colorWarning {
+  animation: pulse 2s infinite;
+}
+
+/* Rating stars */
+.MuiRating-root {
+  color: #ffb400;
+}
+
+/* Table row hover effect */
+.MuiTableRow-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+  transition: background-color 0.3s ease;
+}
+
+/* Action buttons hover */
+.MuiIconButton-root:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* Card hover effect */
+.MuiCard-root:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .MuiTableCell-root {
+    padding: 8px;
+  }
+  
+  .MuiTypography-h4 {
+    font-size: 1.5rem;
+  }
+  
+  .MuiTypography-h3 {
+    font-size: 2rem;
+  }
+}

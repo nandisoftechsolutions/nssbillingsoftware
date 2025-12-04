@@ -1,4 +1,4 @@
-// frontend/src/pages/MainAdmin/Register.jsx
+// src/pages/MainAdmin/Register.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../utils/api";
@@ -13,66 +13,51 @@ function Register() {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [error, setError] = useState("");
-  const url = "https://nssbillingsoftware.vercel.app/register";
-  const title = "Register — Nandi Billing Software";
-  const desc = "Create your Nandi Billing Software account. Get started with GST-compliant billing, inventory and sales tracking.";
-
 
   const [form, setForm] = useState({
     companyName: "",
+    ownerName: "",
+    businessType: "Retail",
+    industryType: "",
     phone: "",
     email: "",
     password: "",
+    confirmPassword: "",
+    acceptTerms: false,
   });
 
-  /* ---------------------------------------------------------
-     Load Razorpay script
-  --------------------------------------------------------- */
+  // Load Razorpay once
   useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-    return () => document.body.removeChild(script);
+    if (!window.Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+      return () => document.body.removeChild(script);
+    }
   }, []);
 
-  /* ---------------------------------------------------------
-     Load Plans — public route
-  --------------------------------------------------------- */
+  // Load plans
   const loadPlans = async () => {
     try {
-      const response = await api.get("/admin/plans");
+      const res = await api.get("/admin/plans/public");
+      const list = res.data?.data || [];
 
-      let plansData = [];
-
-      if (response.data?.success) {
-        plansData = response.data.data;
-      } else if (Array.isArray(response.data)) {
-        plansData = response.data;
-      } else if (response.data?.plans) {
-        plansData = response.data.plans;
-      }
-
-      const normalized = plansData.map((p) => ({
+      const normalized = list.map((p) => ({
         _id: p._id,
         name: p.name,
-        description: p.description || `${p.name} Plan`,
-        monthlyPrice: p.monthlyPrice || 0,
-        yearlyPrice: p.yearlyPrice || 0,
-        isFreeTrial: p.isFreeTrial || false,
+        description: p.description,
+        icon: p.icon || "📦",
+        isFreeTrial: p.isFreeTrial,
         finalPrice: p.yearlyPrice || p.monthlyPrice || 0,
-        features: p.features || [],
-        icon: p.icon,
-        popular: p.popular || false,
       }));
 
       setPlans(normalized);
 
-      // Auto-select free trial
-      const free = normalized.find((p) => p.isFreeTrial);
-      if (free) setSelectedPlan(free);
-    } catch (err) {
-      setError("Failed to load plans");
+      const freePlan = normalized.find((p) => p.isFreeTrial);
+      setSelectedPlan(freePlan);
+    } catch {
+      setError("Failed to load plans.");
     }
   };
 
@@ -80,276 +65,359 @@ function Register() {
     loadPlans();
   }, []);
 
-  /* ---------------------------------------------------------
-     Handle form input
-  --------------------------------------------------------- */
+  // Form changes
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, type, value, checked } = e.target;
+    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
   };
 
-  /* ============================================================
-     REGISTER (Free trial + Payment)
-  ============================================================ */
+  // Validation
+  const validate = () => {
+    if (!form.companyName.trim()) return "Company name is required";
+    if (!form.ownerName.trim()) return "Owner name is required";
+    if (!form.businessType) return "Business type is required";
+    if (!form.industryType.trim()) return "Industry type is required";
+
+    if (!form.phone.trim()) return "Phone number is required";
+    if (!/^[6-9]\d{9}$/.test(form.phone))
+      return "Enter a valid 10-digit phone number";
+
+    if (!form.email.trim()) return "Email is required";
+    if (!/\S+@\S+\.\S+/.test(form.email))
+      return "Enter a valid email address";
+
+    if (!form.password.trim())
+      return "Password is required";
+    if (form.password.length < 6)
+      return "Password must be at least 6 characters";
+
+    if (form.password !== form.confirmPassword)
+      return "Passwords do not match";
+
+    if (!form.acceptTerms)
+      return "Please accept Terms & Conditions";
+
+    if (!selectedPlan)
+      return "Please select a plan";
+
+    return null;
+  };
+
+  // Main submit
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!selectedPlan) {
-      setError("Please select a plan!");
+    const validation = validate();
+    if (validation) {
+      setError(validation);
       return;
     }
-
-    if (!form.companyName || !form.phone || !form.email || !form.password) {
-      setError("Please fill all fields.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      /* 1️⃣ Check if already exists */
-      const check = await api.post("/auth/check-existing", {
+      // Check existing user
+      const chk = await api.post("/auth/check-existing", {
         email: form.email,
         phone: form.phone,
       });
 
-      if (check.data.exists) {
-        setError("Business already registered. Please login.");
+      if (chk.data.exists) {
+        setError("User already registered. Please login.");
         setLoading(false);
         return;
       }
 
-      /* 2️⃣ FREE TRIAL (NO PAYMENT) */
-      if (selectedPlan.isFreeTrial || selectedPlan.finalPrice === 0) {
-        const res = await api.post("/subscription/free-trial", {
-          ...form,
+      // If trial → ₹1 transaction
+      if (selectedPlan.isFreeTrial) {
+        const orderRes = await api.post("/subscription/create-order", {
+          amount: 1,
+          planId: selectedPlan._id,
+          planName: selectedPlan.name,
+          isTrial: true,
         });
 
-        if (!res.data.success) {
-          setError(res.data.message || "Free Trial failed");
-          setLoading(false);
-          return;
-        }
+        const order = orderRes.data.order;
+        if (!order?.id) throw new Error("Order creation failed");
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("tenantId", res.data.tenantId);
-        localStorage.setItem("companyId", res.data.company.id);
-        localStorage.setItem("companyName", res.data.company.name);
+        const razorOptions = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: "INR",
+          name: "Nandi Billing Software",
+          description: "Free Trial Activation",
+          order_id: order.id,
+          handler: async (response) => {
+            try {
+              const verify = await api.post("/subscription/verify-payment", {
+                ...response,
+                ...form,
+                planId: selectedPlan._id,
+                isTrialVerification: true,
+                trialDays: 7,
+              });
 
-        alert("🎉 Free Trial Activated!");
-        navigate("/dashboard");
+              if (!verify.data.success) {
+                setError("Trial activation failed");
+                return;
+              }
+
+              localStorage.setItem("token", verify.data.token);
+              navigate("/dashboard");
+            } catch {
+              setError("Verification failed");
+            }
+          },
+        };
+
+        new window.Razorpay(razorOptions).open();
         return;
       }
 
-      /* 3️⃣ PAID REGISTRATION */
-      if (!window.Razorpay) {
-        setError("Payment system not loaded");
-        setLoading(false);
-        return;
-      }
-
-      const orderRes = await api.post("/subscription/create-order", {
-        amount: selectedPlan.finalPrice,  // FIXED — backend converts to paise
-        planName: selectedPlan.name,
+      // Paid plan
+      const paid = await api.post("/subscription/create-order", {
+        amount: selectedPlan.finalPrice,
         planId: selectedPlan._id,
+        planName: selectedPlan.name,
       });
 
-      if (!orderRes.data?.order?.id) {
-        throw new Error("Order creation failed");
-      }
+      const order = paid.data.order;
+      if (!order?.id) throw new Error("Order creation failed");
 
-      const options = {
+      new window.Razorpay({
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderRes.data.order.amount,
+        amount: order.amount,
         currency: "INR",
         name: "Nandi Billing Software",
-        description: `${selectedPlan.name} - Registration`,
-        order_id: orderRes.data.order.id,
+        description: selectedPlan.name,
+        order_id: order.id,
+        handler: async (resPay) => {
+          const verify = await api.post("/subscription/verify-payment", {
+            ...resPay,
+            ...form,
+            planId: selectedPlan._id,
+            planPrice: selectedPlan.finalPrice,
+          });
 
-        handler: async (response) => {
-          try {
-            const verify = await api.post("/subscription/verify-payment", {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-
-              ...form,
-              planName: selectedPlan.name,
-              planId: selectedPlan._id,
-              planPrice: selectedPlan.finalPrice,
-            });
-
-            if (!verify.data.success) {
-              setError("Payment verification failed.");
-              return;
-            }
-
-            localStorage.setItem("token", verify.data.token);
-            localStorage.setItem("tenantId", verify.data.tenantId);
-            localStorage.setItem("companyId", verify.data.company.id);
-            localStorage.setItem("companyName", verify.data.company.name);
-
-            alert("🎉 Registration Successful!");
-            navigate("/dashboard");
-          } catch (err) {
-            console.error(err);
-            setError("Payment verification failed.");
+          if (!verify.data.success) {
+            setError("Payment failed");
+            return;
           }
-        },
 
-        prefill: {
-          name: form.companyName,
-          email: form.email,
-          contact: form.phone,
+          localStorage.setItem("token", verify.data.token);
+          navigate("/dashboard");
         },
-        theme: { color: "#ff6600" },
-        modal: {
-          ondismiss: () => setLoading(false),
-        },
-      };
-
-      new window.Razorpay(options).open();
-    } catch (err) {
-      console.error(err);
+      }).open();
+    } catch {
       setError("Registration failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------------------------------------------------------
-     Button Text
-  --------------------------------------------------------- */
-  const getButtonText = () => {
-    if (loading) return "Processing...";
-    if (!selectedPlan) return "Select a Plan";
-
-    if (selectedPlan.isFreeTrial || selectedPlan.finalPrice === 0)
-      return "Start Free Trial";
-
-    return `Pay ₹${selectedPlan.finalPrice} & Register`;
-  };
-
   return (
     <>
-    <Helmet>
-        <title>{title}</title>
-        <meta name="description" content={desc} />
-        <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href={url} />
+      <Helmet>
+        <title>Register — Nandi Billing Software</title>
       </Helmet>
-    
-    <div className="nandiReg-wrapper">
-      <div className="nandiReg-card">
-        <div className="nandiReg-header">
-          <img src={nandiLogo} width={120} height={120} alt="Nandi Logo" />
-          <h2 className="nandiReg-title">Register Your Business</h2>
-          <p className="nandiReg-subtitle">Join Nandi Billing Software</p>
-        </div>
 
-        {error && <div className="nandiReg-error">{error}</div>}
-
-        <form onSubmit={handleRegister}>
-          {/* Inputs */}
-          <div className="nandiReg-input-group">
-            <label>Company Name *</label>
-            <input
-              type="text"
-              name="companyName"
-              value={form.companyName}
-              onChange={handleChange}
-              required
+      <div
+        className="min-vh-100 d-flex align-items-center justify-content-center"
+        style={{
+          background: "linear-gradient(135deg, #5b8df7 0%, #6c47ce 100%)",
+          padding: "22px",
+        }}
+      >
+        <div className="nandiReg-card shadow-lg">
+          {/* Logo */}
+          <div className="text-center mb-4">
+            <img
+              src={nandiLogo}
+              width={110}
+              className="shadow-sm rounded-3"
             />
+            <h1 className="fw-bold text-dark mt-3 nandiReg-title">
+              Register Your Business
+            </h1>
+            <p className="text-muted small">Join the Nandi family ❤️</p>
           </div>
 
-          <div className="nandiReg-input-group">
-            <label>Phone *</label>
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {/* Error */}
+          {error && <div className="alert alert-danger text-center">{error}</div>}
 
-          <div className="nandiReg-input-group">
-            <label>Email *</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="nandiReg-input-group">
-            <label>Password *</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              minLength={6}
-              required
-            />
-          </div>
-
-          {/* Plans */}
-          <div className="nandiReg-plans-section">
-            <h5 className="nandiReg-section-title">Choose Your Plan</h5>
-
-            {plans.length === 0 ? (
-              <div className="nandiReg-loading">Loading plans...</div>
-            ) : (
-              <div className="nandiReg-plan-grid">
-                {plans.map((p) => (
-                  <div
-                    key={p._id}
-                    className={`nandiReg-plan-card ${
-                      selectedPlan?._id === p._id ? "nandiReg-selected" : ""
-                    }`}
-                    onClick={() => setSelectedPlan(p)}
-                  >
-                    <div className="nandiReg-plan-header">
-                      <span className="nandiReg-plan-icon">{p.icon || "📦"}</span>
-                      <h4>{p.name}</h4>
-                    </div>
-
-                    <div className="nandiReg-price-section">
-                      {p.isFreeTrial ? (
-                        <h3 className="nandiReg-price-free">FREE</h3>
-                      ) : (
-                        <h3 className="nandiReg-price">₹{p.finalPrice}</h3>
-                      )}
-                      <p className="nandiReg-billing">per year</p>
-                    </div>
-
-                    <p className="nandiReg-desc">{p.description}</p>
-
-                    {selectedPlan?._id === p._id && (
-                      <div className="nandiReg-selected-badge">Selected</div>
-                    )}
-                  </div>
-                ))}
+          <form onSubmit={handleRegister}>
+            <div className="row">
+              {/* Company */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Company Name *</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  className="form-control"
+                  value={form.companyName}
+                  onChange={handleChange}
+                />
               </div>
-            )}
-          </div>
 
-          <button className="nandiReg-btn" disabled={loading || !selectedPlan}>
-            {getButtonText()}
-          </button>
+              {/* Owner */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Owner Name *</label>
+                <input
+                  type="text"
+                  name="ownerName"
+                  className="form-control"
+                  value={form.ownerName}
+                  onChange={handleChange}
+                />
+              </div>
 
-          <p className="nandiReg-login-text">
-            Already have an account?{" "}
-            <Link className="nandiReg-login-link" to="/login">
-              Login Here
-            </Link>
-          </p>
-        </form>
+              {/* Business Type */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Business Type *</label>
+                <select
+                  name="businessType"
+                  className="form-select"
+                  value={form.businessType}
+                  onChange={handleChange}
+                >
+                  <option>Retail</option>
+                  <option>Wholesale</option>
+                  <option>Service</option>
+                  <option>Manufacturing</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              {/* Industry */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Industry Type *</label>
+                <input
+                  type="text"
+                  name="industryType"
+                  className="form-control"
+                  placeholder="Grocery, Mobile, Hardware..."
+                  value={form.industryType}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Phone *</label>
+                <input
+                  type="text"
+                  name="phone"
+                  className="form-control"
+                  value={form.phone}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Email */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control"
+                  value={form.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Password */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">Password *</label>
+                <input
+                  type="password"
+                  name="password"
+                  className="form-control"
+                  value={form.password}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div className="col-12 col-md-6 mb-3">
+                <label className="form-label fw-semibold">
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-control"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Terms */}
+              <div className="col-12 mb-3">
+                <label className="fw-semibold">
+                  <input
+                    type="checkbox"
+                    name="acceptTerms"
+                    className="form-check-input me-2"
+                    onChange={handleChange}
+                  />
+                  Accept Terms & Conditions
+                </label>
+              </div>
+            </div>
+
+            {/* Plan Selection */}
+            <h4 className="fw-bold mt-4 nandiReg-section-title">Choose Your Plan</h4>
+
+            <div className="nandiReg-plan-grid">
+              {plans.map((p) => (
+                <div
+                  key={p._id}
+                  className={`nandiReg-plan-card ${
+                    selectedPlan?._id === p._id ? "nandiReg-selected" : ""
+                  }`}
+                  onClick={() => setSelectedPlan(p)}
+                >
+                  <div className="nandiReg-plan-header">
+                    <span className="nandiReg-plan-icon">{p.icon}</span>
+                    <h5 className="mb-0">{p.name}</h5>
+                  </div>
+
+                  {p.isFreeTrial ? (
+                    <p className="nandiReg-price-free">
+                      7-Day Trial (₹1 verification)
+                    </p>
+                  ) : (
+                    <p className="nandiReg-price">₹{p.finalPrice}</p>
+                  )}
+
+                  <small className="text-muted">{p.description}</small>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary w-100 mt-4 nandiReg-btn"
+            >
+              {loading
+                ? "Processing..."
+                : selectedPlan?.isFreeTrial
+                ? "Start Free Trial"
+                : `Pay ₹${selectedPlan?.finalPrice}`}
+            </button>
+
+            {/* Login CTA */}
+            <p className="text-center mt-3 text-muted fw-semibold">
+              Already have an account?{" "}
+              <Link to="/login" className="text-primary">
+                Login Here
+              </Link>
+            </p>
+          </form>
+        </div>
       </div>
-    </div>
     </>
   );
 }

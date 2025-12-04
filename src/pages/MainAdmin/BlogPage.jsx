@@ -1,8 +1,8 @@
-// src/pages/MainAdmin/BlogPage.jsx
+// src/pages/MainAdmin/BlogPage.jsx - SIMPLIFIED VERSION
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import api from "../../utils/api";
+import api from "../../utils/api"; // Only import api, not fetchPublicBlogs
 import "./BlogPage.css";
 
 const SITE_ROOT = "https://nssbillingsoftware.vercel.app";
@@ -12,6 +12,7 @@ const BlogPage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(null);
 
   // SEO config
   const seoConfig = {
@@ -21,30 +22,125 @@ const BlogPage = () => {
     keywords:
       "GST billing blog, GST India, inventory management, business software, billing software India, SME growth tips",
     canonical: `${SITE_ROOT}/blog${currentPage > 1 ? `?page=${currentPage}` : ""}`,
-    ogImage: `${SITE_ROOT}/images/blog-og-image.jpg`
+    ogImage: `${SITE_ROOT}/images/blog-og-image.jpg`,
   };
 
-  // Fetch blogs from backend
+  // ✅ SIMPLE FETCH FUNCTION - Use the correct endpoint
   const fetchBlogs = async (page = 1) => {
     try {
       setLoading(true);
+      setError(null);
 
-      const res = await api.get(`/admin/blogs/public?page=${page}&limit=6`);
+      // Use the most likely correct endpoint
+      const res = await api.get(`/admin/blogs/public`, {
+        params: { 
+          page: page, 
+          limit: 6,
+          _t: Date.now()
+        }
+      });
 
-      if (res.data.success) {
-        setBlogs(res.data.data);
-        setTotalPages(res.data.pagination.totalPages || 1);
+      console.log("📚 Blog API Response:", res.data);
+      
+      if (res.data && res.data.success) {
+        // Handle your expected response structure
+        const blogsData = res.data.data || res.data.blogs || [];
+        const totalPagesData = res.data.pagination?.totalPages || res.data.totalPages || 1;
+        
+        setBlogs(Array.isArray(blogsData) ? blogsData : []);
+        setTotalPages(Number(totalPagesData) || 1);
+      } else {
+        // Alternative response structure
+        const blogsData = res.data || [];
+        setBlogs(Array.isArray(blogsData) ? blogsData : []);
+        setTotalPages(1);
       }
     } catch (err) {
-      console.error("Blog fetch error:", err);
+      console.error("🚨 Blog Fetch Error:", err);
+      
+      // Provide user-friendly error message
+      let errorMessage = "Failed to load blogs";
+      
+      if (err.statusCode === 404) {
+        errorMessage = "Blog endpoint not found. Please check backend configuration.";
+      } else if (err.statusCode === 401 || err.statusCode === 403) {
+        errorMessage = "Access denied. Please contact administrator.";
+      } else if (!err.response) {
+        errorMessage = "Cannot connect to server. Please check if backend is running.";
+      }
+      
+      setError(errorMessage);
+      setBlogs([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   };
 
+  // Test which endpoint works
+  const testBlogEndpoint = async () => {
+    const endpoints = [
+      '/admin/blogs/public',
+      '/blogs/public',
+      '/api/admin/blogs/public',
+      '/api/blogs/public'
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Testing endpoint: ${endpoint}`);
+        const res = await api.get(endpoint, { params: { page: 1, limit: 1 } });
+        console.log(`✅ Working endpoint found: ${endpoint}`, res.data);
+        return endpoint;
+      } catch (err) {
+        console.log(`❌ ${endpoint} failed:`, err.statusCode || err.message);
+      }
+    }
+    return null;
+  };
+
   useEffect(() => {
-    fetchBlogs(currentPage);
+    const initializeBlogs = async () => {
+      // First, test to find the correct endpoint
+      const workingEndpoint = await testBlogEndpoint();
+      
+      if (workingEndpoint) {
+        console.log(`🎯 Using endpoint: ${workingEndpoint}`);
+        // Use the working endpoint
+        try {
+          setLoading(true);
+          const res = await api.get(workingEndpoint, {
+            params: { page: currentPage, limit: 6 }
+          });
+          
+          if (res.data) {
+            const blogsData = res.data.data || res.data.blogs || res.data;
+            setBlogs(Array.isArray(blogsData) ? blogsData : []);
+            setTotalPages(res.data.totalPages || res.data.pagination?.totalPages || 1);
+          }
+        } catch (err) {
+          console.error("Error fetching with working endpoint:", err);
+          setError("Failed to load blog posts");
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        // If no endpoint works, show error
+        setError("No working blog endpoint found. Please check backend configuration.");
+        setLoading(false);
+      }
+    };
+    
+    initializeBlogs();
   }, [currentPage]);
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Dummy AdSense values
   const ADSENSE_CLIENT = "ca-pub-1234567890000000";
@@ -88,37 +184,57 @@ const BlogPage = () => {
     </div>
   );
 
-  // JSON-LD structured data for blog listing
-  const blogListSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Nandi Billing Blog",
-    url: `${SITE_ROOT}/blog`,
-    description: seoConfig.description,
-    publisher: {
-      "@type": "Organization",
-      name: "Nandi Softech Solutions",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_ROOT}/favicon.ico`
-      }
-    },
-    mainEntity: {
-      "@type": "Blog",
-      name: "Nandi Billing Blog",
-      blogPost: blogs.map((b) => ({
-        "@type": "BlogPosting",
-        headline: b.title,
-        url: `${SITE_ROOT}/blog/${b.slug}`,
-        image: b.featuredImage || `${SITE_ROOT}/images/blog-default.jpg`,
-        datePublished: b.publishedAt,
-        author: {
-          "@type": "Person",
-          name: b.author || "Nandi Billing Team"
-        }
-      }))
-    }
-  };
+  // Error Display Component
+  const ErrorDisplay = () => (
+    <div className="error-container">
+      <div className="error-icon">⚠️</div>
+      <h3>Unable to Load Blogs</h3>
+      <p>{error}</p>
+      
+      <div className="troubleshooting">
+        <h4>Troubleshooting Steps:</h4>
+        <ol>
+          <li>Ensure backend server is running on port 6060</li>
+          <li>Check if blog routes are properly configured</li>
+          <li>Verify the endpoint: <code>/api/admin/blogs/public</code></li>
+          <li>Check browser console for detailed errors</li>
+        </ol>
+      </div>
+      
+      <div className="error-actions">
+        <button 
+          onClick={() => fetchBlogs(currentPage)} 
+          className="retry-btn"
+        >
+          Retry Loading
+        </button>
+        <button 
+          onClick={testBlogEndpoint}
+          className="test-btn"
+        >
+          Test Endpoints
+        </button>
+      </div>
+    </div>
+  );
+
+  // Empty State
+  const EmptyState = () => (
+    <div className="empty-state">
+      <div className="empty-icon">📝</div>
+      <h3>No Blog Posts Available</h3>
+      <p>Check back soon for new articles on GST billing and business management.</p>
+      <button 
+        onClick={() => fetchBlogs(currentPage)}
+        className="retry-btn"
+      >
+        Check Again
+      </button>
+    </div>
+  );
+
+  // Rest of your component remains the same...
+  // [Keep all the existing JSX code from your previous version]
 
   return (
     <>
@@ -147,7 +263,23 @@ const BlogPage = () => {
         <meta name="twitter:site" content="@nandibilling" />
 
         {/* Structured Data for Google */}
-        <script type="application/ld+json">{JSON.stringify(blogListSchema)}</script>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Nandi Billing Blog",
+            url: `${SITE_ROOT}/blog`,
+            description: seoConfig.description,
+            publisher: {
+              "@type": "Organization",
+              name: "Nandi Softech Solutions",
+              logo: {
+                "@type": "ImageObject",
+                url: `${SITE_ROOT}/favicon.ico`,
+              },
+            },
+          })}
+        </script>
 
         {/* AdSense */}
         <script
@@ -166,7 +298,8 @@ const BlogPage = () => {
           <div className="container">
             <h1 className="blog-main-title">Nandi Billing Blog</h1>
             <p className="blog-subtitle">
-              Expert articles on GST billing, inventory management, automation and SME business growth.
+              Expert articles on GST billing, inventory management, automation
+              and SME business growth.
             </p>
 
             <div className="blog-stats">
@@ -182,18 +315,21 @@ const BlogPage = () => {
           <div className="container">
             {loading ? (
               <BlogSkeleton />
+            ) : error ? (
+              <ErrorDisplay />
+            ) : blogs.length === 0 ? (
+              <EmptyState />
             ) : (
               <>
                 <div className="blog-listing-grid">
                   {blogs.map((blog, index) => (
-                    <React.Fragment key={blog._id}>
-                      {/* Blog Card */}
+                    <React.Fragment key={blog._id || blog.id || index}>
                       <article className="blog-card">
                         <div className="blog-card-image-container">
                           {blog.featuredImage ? (
                             <img
                               src={blog.featuredImage}
-                              alt={blog.title}
+                              alt={blog.title || "Blog post"}
                               className="blog-card-image"
                               loading="lazy"
                             />
@@ -204,39 +340,52 @@ const BlogPage = () => {
                           )}
 
                           <div className="blog-card-badge">
-                            {blog.category || "General"}
+                            {blog.category || blog.tags?.[0] || "General"}
                           </div>
                         </div>
 
                         <div className="blog-card-content">
                           <div className="blog-card-meta">
                             <span className="blog-author">
-                              By {blog.author}
+                              By {blog.author || "Nandi Billing Team"}
                             </span>
                             <span className="blog-date">
-                              {new Date(blog.publishedAt).toLocaleDateString("en-IN", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                              })}
+                              {new Date(blog.publishedAt || blog.createdAt || blog.updatedAt).toLocaleDateString(
+                                "en-IN",
+                                {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                }
+                              )}
                             </span>
                           </div>
 
                           <h2 className="blog-card-title">
-                            <Link to={`/blog/${blog.slug}`}>{blog.title}</Link>
+                            <Link to={`/blog/${blog.slug || blog._id || ''}`}>
+                              {blog.title || "Untitled Blog Post"}
+                            </Link>
                           </h2>
 
-                          <p className="blog-card-excerpt">{blog.excerpt}</p>
+                          <p className="blog-card-excerpt">
+                            {blog.excerpt || blog.description || 
+                              "Read this article for insights on business management and GST billing."}
+                          </p>
 
                           <div className="blog-card-cta">
-                            <Link to={`/blog/${blog.slug}`} className="read-more-btn">
+                            <Link
+                              to={`/blog/${blog.slug || blog._id || ''}`}
+                              className="read-more-btn"
+                            >
                               Read More →
                             </Link>
+                            <span className="read-time">
+                              {blog.readTime || "5"} min read
+                            </span>
                           </div>
                         </div>
                       </article>
 
-                      {/* Mid-grid Ads */}
                       {(index === 1 || index === 3) && (
                         <AdBlock
                           position={`in-grid-${index + 1}`}
@@ -248,28 +397,39 @@ const BlogPage = () => {
                   ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="blog-pagination">
                     <button
                       disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      className="pagination-btn prev"
                     >
                       ← Previous
                     </button>
 
-                    <span className="pagination-info">
-                      Page {currentPage} / {totalPages}
-                    </span>
+                    <div className="pagination-numbers">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => i + 1).map(page => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`pagination-number ${currentPage === page ? 'active' : ''}`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
 
                     <button
                       disabled={currentPage === totalPages}
-                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                      className="pagination-btn"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      className="pagination-btn next"
                     >
                       Next →
                     </button>
+                    
+                    <div className="pagination-info">
+                      Page {currentPage} of {totalPages}
+                    </div>
                   </div>
                 )}
               </>
@@ -287,9 +447,17 @@ const BlogPage = () => {
             <p>Receive new blog posts directly to your inbox.</p>
 
             <form className="newsletter-form">
-              <input type="email" placeholder="Enter your email" required />
+              <input 
+                type="email" 
+                placeholder="Enter your email" 
+                required 
+              />
               <button type="submit">Subscribe</button>
             </form>
+            
+            <p className="newsletter-note">
+              We respect your privacy. Unsubscribe at any time.
+            </p>
           </div>
         </section>
       </div>

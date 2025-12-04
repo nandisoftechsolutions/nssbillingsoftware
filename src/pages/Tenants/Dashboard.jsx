@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import api from "../../utils/api";
 import "./Dashboard.css";
-import Inventory from "./Inventory";
-import ManageInvoices from "./ManageInvoices";
-import PurchaseInvoiceList from "./PurchaseInvoiceList";
+
 
 function Dashboard() {
   const [stats, setStats] = useState({
@@ -845,14 +843,6 @@ function Dashboard() {
           )}
         </main>
       </div>
-      
-      {/* Multi-tenant isolated components */}
-      <Inventory/>
-      <hr/>
-      <ManageInvoices/>
-      <hr/>
-      <PurchaseInvoiceList/>
-      <hr/>
     </div>
   );
 }

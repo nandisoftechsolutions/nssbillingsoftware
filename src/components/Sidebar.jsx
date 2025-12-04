@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import api from "../utils/api";
 import "./Sidebar.css";
 
@@ -25,16 +26,10 @@ function Sidebar() {
   // Calculate days remaining
   const calculateDaysRemaining = (expiresAt) => {
     if (!expiresAt) return 7;
-    
     try {
       const now = new Date();
       const expiryDate = new Date(expiresAt);
-      
-      if (isNaN(expiryDate.getTime())) {
-        console.warn('Invalid expiry date:', expiresAt);
-        return 7;
-      }
-      
+      if (isNaN(expiryDate.getTime())) return 7;
       const diffTime = expiryDate - now;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays > 0 ? diffDays : 0;
@@ -65,7 +60,6 @@ function Sidebar() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      
       if (!token) {
         navigate("/login");
         return;
@@ -73,45 +67,27 @@ function Sidebar() {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      console.log("🔄 Fetching tenant info...");
       const response = await api.get("/auth/me");
-      console.log("🔍 FULL AUTH/ME RESPONSE:", response.data);
-      
-      // 🚨 CRITICAL FIX: Handle multiple response structures
       let user, company, tenantData;
-      
+
       if (response.data?.success) {
-        // Structure 1: response.data.data.user, response.data.data.company, response.data.data.tenant
         if (response.data.data) {
           user = response.data.data.user;
           company = response.data.data.company;
           tenantData = response.data.data.tenant;
-          console.log("✅ Using Structure 1: response.data.data");
-        } 
-        // Structure 2: response.data.user, response.data.company, response.data.tenant
-        else {
+        } else {
           user = response.data.user;
           company = response.data.company;
           tenantData = response.data.tenant;
-          console.log("✅ Using Structure 2: response.data");
         }
       } else {
-        // Direct structure without success wrapper
         user = response.data?.user;
         company = response.data?.company;
         tenantData = response.data?.tenant;
-        console.log("✅ Using Direct Structure: response.data");
       }
-      
-      console.log("📊 Extracted data:", {
-        user: user,
-        company: company,
-        tenant: tenantData
-      });
-      
+
       const daysRemaining = calculateDaysRemaining(tenantData?.expiresAt);
-      
-      // 🎯 SET THE ACTUAL DATA
+
       setTenant({
         companyName: company?.name || "Your Company",
         email: user?.email || "user@example.com",
@@ -123,19 +99,10 @@ function Sidebar() {
         daysRemaining: daysRemaining
       });
 
-      console.log("✅ Final tenant state:", {
-        companyName: company?.name,
-        email: user?.email,
-        tenantName: tenantData?.companyName,
-        plan: tenantData?.planName,
-        daysRemaining: daysRemaining
-      });
-
-      // Store in localStorage for fallback
+      // store fallback data
       if (tenantData?.id || tenantData?._id) {
         const tenantId = tenantData.id || tenantData._id;
         localStorage.setItem("tenantId", tenantId);
-        console.log("💾 Stored tenantId:", tenantId);
       }
       if (company?.id || company?._id) {
         const companyId = company.id || company._id;
@@ -145,57 +112,28 @@ function Sidebar() {
         const userId = user.id || user._id;
         localStorage.setItem("userId", userId);
       }
-      if (user?.email) {
-        localStorage.setItem("userEmail", user.email);
-        console.log("💾 Stored userEmail:", user.email);
-      }
-      if (company?.name) {
-        localStorage.setItem("companyName", company.name);
-        console.log("💾 Stored companyName:", company.name);
-      }
+      if (user?.email) localStorage.setItem("userEmail", user.email);
+      if (company?.name) localStorage.setItem("companyName", company.name);
       if (tenantData?.planName || tenantData?.plan) {
         const planName = tenantData.planName || tenantData.plan;
         localStorage.setItem("planName", planName);
-        console.log("💾 Stored planName:", planName);
       }
       if (tenantData?.expiresAt) {
         localStorage.setItem("expiresAt", tenantData.expiresAt);
-        console.log("💾 Stored expiresAt:", tenantData.expiresAt);
       }
       if (tenantData?.isTrial !== undefined) {
         localStorage.setItem("isTrial", tenantData.isTrial.toString());
-        console.log("💾 Stored isTrial:", tenantData.isTrial);
       }
-
     } catch (err) {
-      console.error("❌ Failed to load tenant info:", err);
-      console.error("❌ Error response:", err.response?.data);
-      console.error("❌ Error status:", err.response?.status);
-      
-      if (err.response?.status === 401) {
-        console.log("🔐 Authentication failed, redirecting to login");
-        handleLogout();
-        return;
-      }
-      
-      // Fallback to localStorage data
+      console.error("Failed to load tenant info:", err);
+      // fallback to localStorage
       const userEmail = localStorage.getItem("userEmail");
       const companyName = localStorage.getItem("companyName");
       const planName = localStorage.getItem("planName");
       const expiresAt = localStorage.getItem("expiresAt");
       const isTrial = localStorage.getItem("isTrial") !== 'false';
-      
       const daysRemaining = calculateDaysRemaining(expiresAt);
-      
-      console.log("🔄 Using localStorage fallback:", {
-        companyName,
-        userEmail,
-        planName,
-        expiresAt,
-        isTrial,
-        daysRemaining
-      });
-      
+
       setTenant({
         companyName: companyName || "Your Company",
         email: userEmail || "user@example.com",
@@ -216,14 +154,10 @@ function Sidebar() {
   }, []);
 
   useEffect(() => {
-    if (isMobile) {
-      setIsSidebarOpen(false);
-    }
+    if (isMobile) setIsSidebarOpen(false);
   }, [pathname, isMobile]);
 
   const handleLogout = () => {
-    console.log("🚪 Logging out...");
-    
     localStorage.removeItem("token");
     localStorage.removeItem("tenantId");
     localStorage.removeItem("companyId");
@@ -235,14 +169,13 @@ function Sidebar() {
     localStorage.removeItem("expiresAt");
     localStorage.removeItem("isTrial");
     localStorage.removeItem("loginTime");
-    
+
     delete api.defaults.headers.common["Authorization"];
     delete api.defaults.headers.common["X-Tenant-ID"];
-    
+
     navigate("/login");
   };
 
-  // Get plan badge color
   const getPlanBadgeClass = () => {
     if (tenant.plan?.toLowerCase().includes("premium")) return "plan-badge premium";
     if (tenant.plan?.toLowerCase().includes("pro")) return "plan-badge pro";
@@ -254,7 +187,6 @@ function Sidebar() {
     return "plan-badge free";
   };
 
-  // Get plan display text
   const getPlanDisplayText = () => {
     if (tenant.isTrial) {
       if (tenant.daysRemaining > 0) {
@@ -277,6 +209,7 @@ function Sidebar() {
     { path: "/suppliers", label: "Suppliers", icon: "🏢" },
     { path: "/reports", label: "Reports", icon: "📈" },
     { path: "/ca-report", label: "CA Report", icon: "👨‍💼" },
+    { path: "/rate", label: "Rate Us", icon: "👨‍💼" },
     { path: "/settings", label: "Settings", icon: "⚙️" },
     { path: "/subscription", label: "Subscription", icon: "💳" },
   ];
@@ -303,23 +236,25 @@ function Sidebar() {
         </span>
       </button>
 
-      {/* Backdrop for mobile */}
-      {isSidebarOpen && isMobile && (
-        <div className="sidebar-backdrop" onClick={toggleSidebar} />
-      )}
+      {/* Backdrop for mobile — rendered to body via portal (prevents stacking issues) */}
+      {isSidebarOpen && isMobile &&
+        createPortal(
+          <div className="sidebar-backdrop" onClick={toggleSidebar} />,
+          document.body
+        )
+      }
 
       {/* SIDEBAR */}
       <aside className={`nandi-sidebar ${isSidebarOpen ? "open" : "closed"} ${isMobile ? "mobile" : "desktop"}`}>
-        {/* HEADER SECTION */}
+        {/* HEADER */}
         <div className="nandi-sidebar-header">
-          {/* Tenant Brand */}
           <div className="tenant-brand">
             <div className="tenant-icon">🏢</div>
             <div className="tenant-brand-text">
               {loading ? (
                 <>
-                  <div className="loading-skeleton"></div>
-                  <div className="loading-skeleton" style={{width: '80px', height: '12px'}}></div>
+                  <div className="loading-skeleton" style={{ width: '140px', height: '16px', marginBottom: 6 }}></div>
+                  <div className="loading-skeleton" style={{ width: '80px', height: '12px' }}></div>
                 </>
               ) : (
                 <>
@@ -332,11 +267,10 @@ function Sidebar() {
             </div>
           </div>
 
-          {/* Tenant Info Box */}
           <div className="tenant-box">
             <div className="tenant-title">Logged in as</div>
             {loading ? (
-              <div className="loading-skeleton" style={{width: '100%', height: '14px'}}></div>
+              <div className="loading-skeleton" style={{ width: '100%', height: '14px' }} />
             ) : (
               <>
                 <div className="tenant-email">{tenant.email}</div>
@@ -348,7 +282,7 @@ function Sidebar() {
                 )}
                 {tenant.isTrial && tenant.daysRemaining <= 0 && (
                   <div className="trial-expired">
-                    ❌ Trial expired - <Link to="/subscription" style={{color: '#ff6b6b', textDecoration: 'underline'}}>Upgrade</Link>
+                    ❌ Trial expired - <Link to="/subscription" style={{ color: '#ff6b6b', textDecoration: 'underline' }}>Upgrade</Link>
                   </div>
                 )}
               </>
@@ -356,7 +290,7 @@ function Sidebar() {
           </div>
         </div>
 
-        {/* NAVIGATION LINKS */}
+        {/* LINKS */}
         <div className="nandi-sidebar-links">
           <nav>
             {links.map((link, index) => (
@@ -365,7 +299,7 @@ function Sidebar() {
                 to={link.path}
                 className={`nandi-link ${pathname === link.path ? "active" : ""}`}
                 onClick={() => isMobile && setIsSidebarOpen(false)}
-                style={{animationDelay: `${index * 0.05 + 0.05}s`}}
+                style={{ animationDelay: `${index * 0.05 + 0.05}s` }}
               >
                 <span className="link-icon">{link.icon}</span>
                 <span className="link-label">{link.label}</span>
@@ -374,28 +308,18 @@ function Sidebar() {
           </nav>
         </div>
 
-        {/* BOTTOM SECTION */}
+        {/* BOTTOM */}
         <div className="nandi-sidebar-bottom">
-          {/* Logout Button */}
-          <button 
-            className="logout-btn"
-            onClick={handleLogout}
-            disabled={loading}
-          >
+          <button className="logout-btn" onClick={handleLogout} disabled={loading}>
             <span className="logout-icon">🚪</span>
             {loading ? "Loading..." : "Logout"}
           </button>
 
-          {/* Footer */}
           <div className="sidebar-footer">
             <div className="copyright-text">
               © {new Date().getFullYear()} All rights reserved
             </div>
-            <div 
-              className="nandi-solutions-link"
-              onClick={handleNandiSolutionsClick}
-              title="Visit Nandi Solutions"
-            >
+            <div className="nandi-solutions-link" onClick={handleNandiSolutionsClick} title="Visit Nandi Solutions">
               <span className="nandi-icon">🚀</span>
               Nandi Solutions
             </div>

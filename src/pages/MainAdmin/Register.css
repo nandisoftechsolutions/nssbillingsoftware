@@ -1,222 +1,130 @@
-/* ===============================
-   Nandi Billing – Register Page
-   Premium Gradient UI
-   =============================== */
+/* Match Login Page Visual Style */
 
-.nandiReg-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #ffe5cc, #fff8f0);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 30px;
-}
-
-/* Card */
+/* Smooth card visuals */
 .nandiReg-card {
-  background: #ffffff;
   width: 100%;
-  max-width: 720px;
-  padding: 35px 40px;
-  border-radius: 18px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  animation: fadeUp 0.4s ease;
+  max-width: 900px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border-radius: 1.2rem !important;
+  padding: 2.2rem;
+  animation: fadeIn 0.35s ease-out;
 }
 
-/* Fade animation */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Header */
-.nandiReg-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.nandiReg-logo {
-  width: 110px;
-  margin-bottom: 10px;
-}
-
+/* Title */
 .nandiReg-title {
-  font-size: 28px;
-  font-weight: 800;
+  font-size: 1.9rem;
+  letter-spacing: 0.2px;
 }
 
-.nandiReg-subtitle {
-  color: #777;
-  font-size: 14px;
-}
-
-/* Error message */
-.nandiReg-error {
-  background: #ffe1e1;
-  color: #d60000;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 15px;
-}
-
-/* Section Title */
+/* Section title */
 .nandiReg-section-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 12px;
-  margin-top: 15px;
+  font-size: 1.25rem;
+  color: #222;
+  margin-bottom: 8px;
 }
 
-/* Plans Grid */
+/* Plan Grid */
 .nandiReg-plan-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  margin-bottom: 25px;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+  margin-top: 1rem;
 }
 
-/* Plan Card */
+/* Plan Cards */
 .nandiReg-plan-card {
-  background: #fafafa;
-  border-radius: 15px;
-  padding: 20px 22px;
-  text-align: center;
-  transition: 0.3s ease;
+  border: 1px solid #dfe3f0;
+  background: #fff;
+  padding: 1rem 1.2rem;
+  border-radius: 1rem;
   cursor: pointer;
-  border: 2px solid transparent;
+  transition: all 0.25s ease;
 }
 
 .nandiReg-plan-card:hover {
-  background: #ffffff;
-  transform: translateY(-4px);
-  border-color: #ff8c3f;
-  box-shadow: 0 8px 25px rgba(255, 140, 63, 0.15);
+  border-color: #5b8df7;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 14px rgba(91,141,247,0.15);
 }
 
+/* Selected Card */
 .nandiReg-selected {
-  border-color: #ff6f00 !important;
-  background: #fff7ec !important;
-  box-shadow: 0 0 15px rgba(255, 140, 0, 0.25);
+  border: 2px solid #5b8df7 !important;
+  box-shadow: 0 0 0 3px rgba(91,141,247,0.25) !important;
 }
 
+/* Plan icon */
+.nandiReg-plan-icon {
+  font-size: 1.55rem;
+  margin-right: 8px;
+}
+
+/* Headers inside card */
+.nandiReg-plan-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Free */
+.nandiReg-price-free {
+  color: #2c7c26;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* Paid */
 .nandiReg-price {
-  font-size: 32px;
-  font-weight: 800;
-  color: #ff6f00;
-  margin: 10px 0 5px 0;
-}
-
-.nandiReg-duration {
-  font-size: 13px;
-  color: #666;
-}
-
-.nandiReg-desc {
-  font-size: 14px;
-  color: #777;
-  margin-top: 10px;
-}
-
-.nandiReg-badge {
-  margin-top: 10px;
-  display: inline-block;
-  background: #ff6f00;
-  color: #fff;
-  padding: 5px 12px;
-  font-size: 12px;
-  border-radius: 20px;
-  font-weight: 600;
-}
-
-/* Form */
-.nandiReg-input-group {
-  margin-bottom: 18px;
-}
-
-.nandiReg-input-group label {
-  font-weight: 600;
-  margin-bottom: 6px;
-  display: block;
-}
-
-.nandiReg-input-group input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 2px solid #ddd;
-  background: #fff;
-  transition: 0.2s;
-  font-size: 15px;
-}
-
-.nandiReg-input-group input:focus {
-  border-color: #ff6f00;
-  box-shadow: 0 0 8px rgba(255, 140, 63, 0.25);
-  outline: none;
+  color: #1f40a0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 /* Button */
 .nandiReg-btn {
-  background: linear-gradient(135deg, #ff7a00, #ff9d3f);
-  color: white;
-  border: none;
-  width: 100%;
-  padding: 14px 0;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 16px;
+  font-size: 1.05rem;
+  padding: 0.85rem;
+  border-radius: 0.9rem !important;
+}
+
+/* Inputs match login style */
+.form-control,
+.form-select {
+  border-radius: 0.9rem !important;
+  padding: 0.85rem !important;
+  border: 1px solid #d9d9e0 !important;
+  background-color: #fff !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #5b8df7 !important;
+  box-shadow: 0 0 0 3px rgba(91,141,247,0.25) !important;
+}
+
+/* Alerts */
+.alert {
+  border-radius: 0.9rem !important;
+  font-size: 0.92rem;
+  padding: 0.9rem 1rem;
+}
+
+/* Checkbox alignment */
+.form-check-input {
+  width: 1rem;
+  height: 1rem;
   cursor: pointer;
-  transition: 0.25s ease;
-  margin-top: 8px;
 }
 
-.nandiReg-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(255, 140, 63, 0.35);
-}
-
-.nandiReg-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Login Link */
-.nandiReg-login-text {
-  text-align: center;
-  margin-top: 15px;
-  color: #666;
-  font-size: 14px;
-}
-
-.nandiReg-login-link {
-  color: #ff6f00;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.nandiReg-login-link:hover {
-  text-decoration: underline;
-}
-
-/* Responsive */
-@media (max-width: 520px) {
+/* Animation fix for mobile */
+@media(max-width: 576px) {
   .nandiReg-card {
-    padding: 25px;
-  }
-
-  .nandiReg-title {
-    font-size: 24px;
-  }
-
-  .nandiReg-price {
-    font-size: 26px;
+    padding: 1.5rem;
   }
 }

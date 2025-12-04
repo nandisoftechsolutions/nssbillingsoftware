@@ -4,10 +4,33 @@ import AdminSidebar from "../../components/AdminSidebar";
 import api from "../../utils/api";
 import "./AdminPlans.css";
 
+// Icon Components
+const PlanIcon = () => <span className="icon">⚙️</span>;
+const BackIcon = () => <span className="icon">←</span>;
+const StatsIcon = () => <span className="icon">📊</span>;
+const PopularIcon = () => <span className="icon">⭐</span>;
+const TrialIcon = () => <span className="icon">🎉</span>;
+const ActiveIcon = () => <span className="icon">✅</span>;
+const EditIcon = () => <span className="icon">✏️</span>;
+const DeleteIcon = () => <span className="icon">🗑️</span>;
+const PlusIcon = () => <span className="icon">➕</span>;
+const CheckIcon = () => <span className="icon">✓</span>;
+const CloseIcon = () => <span className="icon">×</span>;
+const LoadingIcon = () => <span className="icon">⏳</span>;
+const ColorIcon = () => <span className="icon">🎨</span>;
+const FeatureIcon = () => <span className="icon">🎯</span>;
+const PriceIcon = () => <span className="icon">💰</span>;
+const SettingsIcon = () => <span className="icon">⚙️</span>;
+
 function AdminPlans() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const emptyForm = {
     name: "",
@@ -28,8 +51,8 @@ function AdminPlans() {
     isActive: true,
     displayOrder: 0,
     colorScheme: {
-      primary: "#0052ff",
-      secondary: "#667eea"
+      primary: "#3b82f6",
+      secondary: "#60a5fa"
     },
     features: [{ text: "", included: true, tooltip: "" }],
     allowedUpgrades: [],
@@ -38,14 +61,17 @@ function AdminPlans() {
 
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("form");
+  const [activeTab, setActiveTab] = useState("plans");
   const [availablePlans, setAvailablePlans] = useState([]);
+  const [expandedPlan, setExpandedPlan] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Detect screen size
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const width = window.innerWidth;
+      setIsMobile(width <= 768);
+      setIsTablet(width > 768 && width <= 1024);
     };
 
     checkScreenSize();
@@ -54,19 +80,29 @@ function AdminPlans() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // FETCH PLANS FROM DB
+  // Fetch plans from database
   const fetchPlans = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      
       const response = await api.get("/admin/plans");
+      
       if (response.data?.success) {
         setPlans(response.data.data || []);
-        setAvailablePlans(['Trial', 'Basic', 'Professional', 'Enterprise']);
+        // Extract unique plan names for upgrade/downgrade selection
+        const planNames = [...new Set(response.data.data.map(p => p.name))];
+        setAvailablePlans(planNames.length ? planNames : ['Trial', 'Basic', 'Professional', 'Enterprise']);
       } else {
         setPlans(response.data || []);
       }
     } catch (err) {
       console.error("Error loading plans:", err);
-      alert("Failed to load plans");
+      const errorMessage = err.response?.data?.message || "Failed to load plans";
+      setError(errorMessage);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,47 +110,47 @@ function AdminPlans() {
     fetchPlans();
   }, []);
 
-  // HANDLE INPUT CHANGE
+  // Handle form input changes
   const updateField = (key, value) => {
-    setForm({ ...form, [key]: value });
+    setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  // HANDLE COLOR SCHEME CHANGE
+  // Handle color scheme changes
   const updateColorScheme = (key, value) => {
-    setForm({ 
-      ...form, 
+    setForm(prev => ({ 
+      ...prev, 
       colorScheme: {
-        ...form.colorScheme,
+        ...prev.colorScheme,
         [key]: value
       }
-    });
+    }));
   };
 
-  // HANDLE FEATURE CHANGE
+  // Handle feature changes
   const updateFeature = (index, key, value) => {
-    const updated = [...form.features];
-    updated[index][key] = value;
-    setForm({ ...form, features: updated });
+    const updatedFeatures = [...form.features];
+    updatedFeatures[index][key] = value;
+    setForm(prev => ({ ...prev, features: updatedFeatures }));
   };
 
-  // ADD NEW FEATURE
+  // Add new feature
   const addFeature = () => {
-    setForm({
-      ...form,
-      features: [...form.features, { text: "", included: true, tooltip: "" }],
-    });
+    setForm(prev => ({
+      ...prev,
+      features: [...prev.features, { text: "", included: true, tooltip: "" }]
+    }));
   };
 
-  // REMOVE FEATURE
+  // Remove feature
   const removeFeature = (index) => {
     if (form.features.length > 1) {
-      const updated = [...form.features];
-      updated.splice(index, 1);
-      setForm({ ...form, features: updated });
+      const updatedFeatures = [...form.features];
+      updatedFeatures.splice(index, 1);
+      setForm(prev => ({ ...prev, features: updatedFeatures }));
     }
   };
 
-  // HANDLE UPGRADE/DOWNGRADE SELECTION
+  // Toggle plan selection for upgrades/downgrades
   const togglePlanSelection = (planType, planName) => {
     const currentArray = [...form[planType]];
     const index = currentArray.indexOf(planName);
@@ -125,12 +161,17 @@ function AdminPlans() {
       currentArray.push(planName);
     }
     
-    setForm({ ...form, [planType]: currentArray });
+    setForm(prev => ({ ...prev, [planType]: currentArray }));
   };
 
-  // VALIDATE FORM DATA BEFORE SUBMISSION
+  // Validate form data
   const validateForm = () => {
     const errors = [];
+
+    if (!form.name.trim()) errors.push("Plan name is required");
+    if (!form.planCode.trim()) errors.push("Plan code is required");
+    if (form.monthlyPrice === "" || form.monthlyPrice < 0) errors.push("Valid monthly price is required");
+    if (form.yearlyPrice === "" || form.yearlyPrice < 0) errors.push("Valid yearly price is required");
 
     // Check for empty feature texts
     const emptyFeatures = form.features.filter(feature => !feature.text.trim());
@@ -146,21 +187,23 @@ function AdminPlans() {
     return errors;
   };
 
-  // SUBMIT FORM
+  // Submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      setError(`❌ Validation Failed:\n${validationErrors.join('\n')}`);
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
+
+    setFormLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      // Validate form before submission
-      const validationErrors = validateForm();
-      if (validationErrors.length > 0) {
-        alert(`❌ Validation Error:\n${validationErrors.join('\n')}`);
-        setLoading(false);
-        return;
-      }
-
-      // Prepare data for API - filter out empty features
+      // Prepare data for API
       const submitData = {
         ...form,
         monthlyPrice: Number(form.monthlyPrice),
@@ -170,78 +213,41 @@ function AdminPlans() {
         maxInvoices: Number(form.maxInvoices),
         storageLimit: Number(form.storageLimit),
         displayOrder: Number(form.displayOrder),
-        // Filter out empty features
         features: form.features.filter(feature => feature.text.trim() !== ''),
-        // Ensure badge is empty string if no value
         badge: form.badge || "",
-        // Ensure arrays are properly set
         allowedUpgrades: form.allowedUpgrades || [],
         allowedDowngrades: form.allowedDowngrades || []
       };
 
-      // Remove empty badge if needed
-      if (!submitData.badge) {
-        delete submitData.badge;
-      }
-
       let response;
       if (editingId) {
         response = await api.put(`/admin/plans/${editingId}`, submitData);
-        alert("✅ Plan updated successfully");
+        setSuccess("✅ Plan updated successfully");
       } else {
         response = await api.post("/admin/plans", submitData);
-        alert("✅ Plan added successfully");
+        setSuccess("✅ Plan created successfully");
       }
 
-      setForm(emptyForm);
-      setEditingId(null);
+      resetForm();
       fetchPlans();
       setActiveTab("plans");
+      
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error("Save error:", err);
-      
-      // Enhanced error handling
-      if (err.response?.data?.errors) {
-        const errorMessages = err.response.data.errors.map(error => 
-          `${error.field}: ${error.message}`
-        ).join('\n');
-        alert(`❌ Validation Failed:\n${errorMessages}`);
-      } else if (err.response?.data?.message) {
-        alert(`❌ Error: ${err.response.data.message}`);
-      } else {
-        alert("❌ Failed to save plan. Please check your data and try again.");
-      }
+      const errorMessage = err.response?.data?.message || "Failed to save plan";
+      setError(`❌ ${errorMessage}`);
+      setTimeout(() => setError(null), 5000);
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
-  // VALIDATE PLAN DATA BEFORE SUBMISSION (OPTIONAL PRE-VALIDATION)
-  const validatePlanData = async () => {
-    try {
-      const submitData = {
-        ...form,
-        monthlyPrice: Number(form.monthlyPrice),
-        yearlyPrice: Number(form.yearlyPrice),
-        features: form.features.filter(feature => feature.text.trim() !== '')
-      };
-
-      await api.post("/admin/plans/validate", submitData);
-      return { isValid: true, message: "Plan data is valid" };
-    } catch (err) {
-      return { 
-        isValid: false, 
-        message: err.response?.data?.message || "Validation failed" 
-      };
-    }
-  };
-
-  // EDIT
+  // Edit plan
   const handleEdit = (plan) => {
     setForm({
       ...emptyForm,
       ...plan,
-      // Ensure features array is properly formatted
       features: plan.features?.length ? 
         plan.features.map(f => ({ 
           text: f.text || "", 
@@ -249,167 +255,273 @@ function AdminPlans() {
           tooltip: f.tooltip || "" 
         })) : 
         [{ text: "", included: true, tooltip: "" }],
-      // Ensure arrays are properly set
       allowedUpgrades: plan.allowedUpgrades || [],
       allowedDowngrades: plan.allowedDowngrades || [],
-      // Ensure badge is properly set
       badge: plan.badge || ""
     });
     setEditingId(plan._id);
     setActiveTab("form");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // DELETE
+  // Delete plan
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this plan?")) return;
+    if (!window.confirm("Are you sure you want to delete this plan? This action cannot be undone.")) return;
 
     try {
+      setLoading(true);
       await api.delete(`/admin/plans/${id}`);
-      alert("🗑️ Plan deleted successfully");
+      setSuccess("🗑️ Plan deleted successfully");
       fetchPlans();
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      alert(err.response?.data?.message || "❌ Failed to delete plan");
+      console.error("Delete error:", err);
+      setError("❌ Failed to delete plan");
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // CANCEL EDIT
-  const cancelEdit = () => {
-    setForm(emptyForm);
-    setEditingId(null);
-  };
-
-  // TOGGLE PLAN ACTIVATION
+  // Toggle plan activation
   const togglePlanActivation = async (plan) => {
     try {
+      setLoading(true);
       await api.put(`/admin/plans/${plan._id}`, { 
         isActive: !plan.isActive 
       });
-      alert(`Plan ${!plan.isActive ? 'activated' : 'deactivated'} successfully`);
+      setSuccess(`Plan ${!plan.isActive ? 'activated' : 'deactivated'} successfully`);
       fetchPlans();
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      alert("❌ Failed to update plan status");
+      console.error("Toggle activation error:", err);
+      setError("❌ Failed to update plan status");
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Reset form
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+    setError(null);
+  };
+
+  // Cancel edit
+  const cancelEdit = () => {
+    resetForm();
+    setActiveTab("plans");
+  };
+
+  // Toggle plan expansion on mobile
+  const togglePlanExpansion = (planId) => {
+    setExpandedPlan(expandedPlan === planId ? null : planId);
+  };
+
+  // Filter plans based on search
+  const filteredPlans = plans.filter(plan =>
+    plan.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plan.planCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    plan.tagline?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // Plan statistics
   const planStats = {
     total: plans.length,
     popular: plans.filter(p => p.popular).length,
     freeTrial: plans.filter(p => p.isFreeTrial).length,
-    active: plans.filter(p => p.isActive).length,
-    inactive: plans.filter(p => !p.isActive).length
+    active: plans.filter(p => p.isActive).length
   };
 
-  // Icons options - matches backend enum
-  const iconOptions = ["📦", "🚀", "🏢", "💎", "⭐", "👑", "🎯"];
+  // Icon options
+  const iconOptions = ["📦", "🚀", "🏢", "💎", "⭐", "👑", "🎯", "💼", "🔧", "⚡"];
   
-  // Badge options - matches backend enum
-  const badgeOptions = ["", "Limited", "Popular", "Best Value", "Recommended"];
+  // Badge options
+  const badgeOptions = ["", "Limited", "Popular", "Best Value", "Recommended", "New", "Featured"];
 
   return (
-    <div className="nandi-admin-layout">
+    <div className="admin-plans-container">
       <AdminSidebar />
-
-      <main className="nandi-admin-main">
-        {/* Header */}
+      
+      <main className="admin-plans-main">
+        {/* Header Section */}
         <header className="admin-plans-header">
-          <div className="admin-plans-header-content">
-            <div className="admin-plans-header-left">
-              <div className="admin-breadcrumb">Admin / Plans</div>
-              <h1 className="admin-title">⚙️ Manage Subscription Plans</h1>
-              <p className="admin-subtitle">
-                Create and manage subscription plans with advanced settings
-              </p>
+          <div className="header-content">
+            <div className="header-left">
+              <div className="breadcrumb">
+                <span onClick={() => navigate("/admin/dashboard")}>Dashboard</span>
+                <span className="separator">/</span>
+                <span className="current">Subscription Plans</span>
+              </div>
+              <div className="header-title">
+                <h1><PlanIcon /> Plan Management</h1>
+                <p className="subtitle">Create and manage subscription plans with advanced configurations</p>
+              </div>
             </div>
-            <div className="admin-plans-header-right">
+            <div className="header-right">
               <button
-                className="admin-back-btn"
+                className="btn btn-secondary back-btn"
                 onClick={() => navigate("/admin/dashboard")}
+                title="Back to Dashboard"
               >
-                <span className="back-icon">⬅️</span>
-                {!isMobile && <span>Back to Dashboard</span>}
+                <BackIcon /> {!isMobile && 'Dashboard'}
               </button>
+            </div>
+          </div>
+
+          {/* Stats Overview */}
+          <div className="header-stats">
+            <div className="stat-card">
+              <div className="stat-icon primary">
+                <StatsIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{planStats.total}</h3>
+                <p>Total Plans</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon warning">
+                <PopularIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{planStats.popular}</h3>
+                <p>Popular</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon info">
+                <TrialIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{planStats.freeTrial}</h3>
+                <p>Free Trials</p>
+              </div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon success">
+                <ActiveIcon />
+              </div>
+              <div className="stat-content">
+                <h3>{planStats.active}</h3>
+                <p>Active</p>
+              </div>
             </div>
           </div>
         </header>
 
+        {/* Alerts */}
+        <div className="alerts-container">
+          {error && (
+            <div className="alert alert-error slide-in">
+              <div className="alert-content">
+                <span className="icon">❌</span>
+                <span>{error}</span>
+              </div>
+              <button className="alert-close" onClick={() => setError(null)}>
+                <CloseIcon />
+              </button>
+            </div>
+          )}
+          
+          {success && (
+            <div className="alert alert-success slide-in">
+              <div className="alert-content">
+                <span className="icon">✅</span>
+                <span>{success}</span>
+              </div>
+              <button className="alert-close" onClick={() => setSuccess(null)}>
+                <CloseIcon />
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="admin-plans-content">
-          {/* Stats Overview */}
-          <div className="plans-stats-grid">
-            <div className="plan-stat-card">
-              <div className="stat-icon">📊</div>
-              <div className="stat-content">
-                <div className="stat-value">{planStats.total}</div>
-                <div className="stat-label">Total Plans</div>
-              </div>
+          {/* Tabs and Search */}
+          <div className="content-header">
+            <div className="tabs-container">
+              <button 
+                className={`tab ${activeTab === 'form' ? 'active' : ''}`}
+                onClick={() => setActiveTab('form')}
+              >
+                {editingId ? '✏️ Edit Plan' : '➕ Create Plan'}
+              </button>
+              <button 
+                className={`tab ${activeTab === 'plans' ? 'active' : ''}`}
+                onClick={() => setActiveTab('plans')}
+              >
+                📋 View Plans ({plans.length})
+              </button>
             </div>
-            <div className="plan-stat-card">
-              <div className="stat-icon">⭐</div>
-              <div className="stat-content">
-                <div className="stat-value">{planStats.popular}</div>
-                <div className="stat-label">Popular Plans</div>
+
+            {activeTab === 'plans' && (
+              <div className="search-container">
+                <div className="search-box">
+                  <span className="search-icon">🔍</span>
+                  <input
+                    type="text"
+                    placeholder="Search plans..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                  {searchTerm && (
+                    <button 
+                      className="clear-search"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      <CloseIcon />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="plan-stat-card">
-              <div className="stat-icon">🎉</div>
-              <div className="stat-content">
-                <div className="stat-value">{planStats.freeTrial}</div>
-                <div className="stat-label">Free Trials</div>
-              </div>
-            </div>
-            <div className="plan-stat-card">
-              <div className="stat-icon">✅</div>
-              <div className="stat-content">
-                <div className="stat-value">{planStats.active}</div>
-                <div className="stat-label">Active Plans</div>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Tabs Navigation */}
-          <div className="plans-tabs">
-            <button 
-              className={`tab-button ${activeTab === 'form' ? 'active' : ''}`}
-              onClick={() => setActiveTab('form')}
-            >
-              {editingId ? '✏️ Edit Plan' : '➕ Create Plan'}
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'plans' ? 'active' : ''}`}
-              onClick={() => setActiveTab('plans')}
-            >
-              📋 All Plans ({plans.length})
-            </button>
-          </div>
+          {/* Loading State */}
+          {loading && activeTab === 'plans' && (
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <p>Loading plans...</p>
+            </div>
+          )}
 
           {/* Form Section */}
           {activeTab === 'form' && (
-            <div className="plans-form-section">
-              <div className="plan-form-card">
+            <div className="form-section">
+              <div className="form-card">
                 <div className="form-header">
                   <h3 className="form-title">
                     {editingId ? '✏️ Edit Plan' : '➕ Create New Plan'}
                   </h3>
                   {editingId && (
                     <button 
-                      type="button" 
-                      className="cancel-edit-btn"
+                      className="btn btn-secondary cancel-btn"
                       onClick={cancelEdit}
+                      disabled={formLoading}
                     >
-                      Cancel Edit
+                      Cancel
                     </button>
                   )}
                 </div>
 
                 <form onSubmit={handleSubmit} className="plan-form">
                   {/* Basic Information */}
-                  <div className="form-section">
-                    <h4 className="section-title">📝 Basic Information</h4>
+                  <div className="form-group-section">
+                    <h4 className="section-title">
+                      <SettingsIcon /> Basic Information
+                    </h4>
                     <div className="form-grid">
                       <div className="form-group">
-                        <label className="form-label">Plan Name *</label>
+                        <label className="form-label required">Plan Name</label>
                         <select
-                          className="form-input"
+                          className="form-select"
                           value={form.name}
                           onChange={(e) => updateField("name", e.target.value)}
                           required
@@ -419,28 +531,29 @@ function AdminPlans() {
                           <option value="Basic">Basic</option>
                           <option value="Professional">Professional</option>
                           <option value="Enterprise">Enterprise</option>
+                          <option value="Premium">Premium</option>
+                          <option value="Custom">Custom</option>
                         </select>
                       </div>
 
                       <div className="form-group">
-                        <label className="form-label">Plan Code *</label>
+                        <label className="form-label required">Plan Code</label>
                         <input
                           type="text"
                           className="form-input"
-                          placeholder="e.g., BASIC_PLAN"
+                          placeholder="BASIC_PLAN"
                           value={form.planCode}
                           onChange={(e) => updateField("planCode", e.target.value.toUpperCase())}
                           required
                           pattern="[A-Z0-9_]+"
-                          title="Uppercase letters, numbers, and underscores only"
                         />
-                        <small className="form-help">Uppercase letters, numbers, and underscores only</small>
+                        <small className="form-help">Uppercase, numbers, and underscores only</small>
                       </div>
 
                       <div className="form-group">
                         <label className="form-label">Badge</label>
                         <select
-                          className="form-input"
+                          className="form-select"
                           value={form.badge}
                           onChange={(e) => updateField("badge", e.target.value)}
                         >
@@ -454,75 +567,61 @@ function AdminPlans() {
 
                       <div className="form-group">
                         <label className="form-label">Icon</label>
-                        <select
-                          className="form-input"
-                          value={form.icon}
-                          onChange={(e) => updateField("icon", e.target.value)}
-                        >
+                        <div className="icon-selector">
                           {iconOptions.map(icon => (
-                            <option key={icon} value={icon}>
+                            <button
+                              key={icon}
+                              type="button"
+                              className={`icon-option ${form.icon === icon ? 'selected' : ''}`}
+                              onClick={() => updateField("icon", icon)}
+                              title={icon}
+                            >
                               {icon}
-                            </option>
+                            </button>
                           ))}
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Display Order</label>
-                        <input
-                          type="number"
-                          className="form-input"
-                          placeholder="0"
-                          value={form.displayOrder}
-                          onChange={(e) => updateField("displayOrder", e.target.value)}
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label className="form-label">Tagline</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          placeholder="Short catchy phrase"
-                          value={form.tagline}
-                          onChange={(e) => updateField("tagline", e.target.value)}
-                          maxLength="100"
-                        />
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Pricing & Limits */}
-                  <div className="form-section">
-                    <h4 className="section-title">💰 Pricing & Limits</h4>
+                  {/* Pricing */}
+                  <div className="form-group-section">
+                    <h4 className="section-title">
+                      <PriceIcon /> Pricing & Limits
+                    </h4>
                     <div className="form-grid">
                       <div className="form-group">
-                        <label className="form-label">Monthly Price (₹) *</label>
-                        <input
-                          type="number"
-                          className="form-input"
-                          placeholder="0"
-                          value={form.monthlyPrice}
-                          onChange={(e) => updateField("monthlyPrice", e.target.value)}
-                          min="0"
-                          step="0.01"
-                          required
-                        />
+                        <label className="form-label required">Monthly Price (₹)</label>
+                        <div className="input-with-suffix">
+                          <input
+                            type="number"
+                            className="form-input"
+                            placeholder="0"
+                            value={form.monthlyPrice}
+                            onChange={(e) => updateField("monthlyPrice", e.target.value)}
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                          <span className="input-suffix">₹</span>
+                        </div>
                       </div>
 
                       <div className="form-group">
-                        <label className="form-label">Yearly Price (₹) *</label>
-                        <input
-                          type="number"
-                          className="form-input"
-                          placeholder="0"
-                          value={form.yearlyPrice}
-                          onChange={(e) => updateField("yearlyPrice", e.target.value)}
-                          min="0"
-                          step="0.01"
-                          required
-                        />
+                        <label className="form-label required">Yearly Price (₹)</label>
+                        <div className="input-with-suffix">
+                          <input
+                            type="number"
+                            className="form-input"
+                            placeholder="0"
+                            value={form.yearlyPrice}
+                            onChange={(e) => updateField("yearlyPrice", e.target.value)}
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                          <span className="input-suffix">₹</span>
+                        </div>
                       </div>
 
                       <div className="form-group">
@@ -577,10 +676,12 @@ function AdminPlans() {
                   </div>
 
                   {/* Color Scheme */}
-                  <div className="form-section">
-                    <h4 className="section-title">🎨 Color Scheme</h4>
-                    <div className="form-grid">
-                      <div className="form-group">
+                  <div className="form-group-section">
+                    <h4 className="section-title">
+                      <ColorIcon /> Color Scheme
+                    </h4>
+                    <div className="color-grid">
+                      <div className="color-group">
                         <label className="form-label">Primary Color</label>
                         <div className="color-input-group">
                           <input
@@ -594,12 +695,12 @@ function AdminPlans() {
                             className="form-input color-value"
                             value={form.colorScheme.primary}
                             onChange={(e) => updateColorScheme("primary", e.target.value)}
-                            placeholder="#0052ff"
+                            placeholder="#3b82f6"
                           />
                         </div>
                       </div>
 
-                      <div className="form-group">
+                      <div className="color-group">
                         <label className="form-label">Secondary Color</label>
                         <div className="color-input-group">
                           <input
@@ -613,7 +714,7 @@ function AdminPlans() {
                             className="form-input color-value"
                             value={form.colorScheme.secondary}
                             onChange={(e) => updateColorScheme("secondary", e.target.value)}
-                            placeholder="#667eea"
+                            placeholder="#60a5fa"
                           />
                         </div>
                       </div>
@@ -621,43 +722,45 @@ function AdminPlans() {
                   </div>
 
                   {/* Description */}
-                  <div className="form-section">
-                    <h4 className="section-title">📄 Description</h4>
+                  <div className="form-group-section">
+                    <h4 className="section-title">Description</h4>
                     <div className="form-group">
                       <textarea
                         className="form-textarea"
-                        placeholder="Detailed plan description..."
+                        placeholder="Describe the plan features and benefits..."
                         value={form.description}
                         onChange={(e) => updateField("description", e.target.value)}
                         rows="3"
-                        maxLength="200"
+                        maxLength="500"
                       />
-                      <small className="form-help">{form.description.length}/200 characters</small>
+                      <div className="char-count">
+                        {form.description.length}/500 characters
+                      </div>
                     </div>
                   </div>
 
                   {/* Plan Settings */}
-                  <div className="form-section">
-                    <h4 className="section-title">⚙️ Plan Settings</h4>
+                  <div className="form-group-section">
+                    <h4 className="section-title">Plan Settings</h4>
                     <div className="toggle-grid">
                       <label className="toggle-item">
                         <input
                           type="checkbox"
-                          className="toggle-input"
+                          className="toggle-checkbox"
                           checked={form.popular}
                           onChange={(e) => updateField("popular", e.target.checked)}
                         />
                         <span className="toggle-slider"></span>
                         <span className="toggle-label">
                           <span className="toggle-icon">⭐</span>
-                          Mark as Popular Plan
+                          Mark as Popular
                         </span>
                       </label>
 
                       <label className="toggle-item">
                         <input
                           type="checkbox"
-                          className="toggle-input"
+                          className="toggle-checkbox"
                           checked={form.isFreeTrial}
                           onChange={(e) => updateField("isFreeTrial", e.target.checked)}
                         />
@@ -671,80 +774,42 @@ function AdminPlans() {
                       <label className="toggle-item">
                         <input
                           type="checkbox"
-                          className="toggle-input"
+                          className="toggle-checkbox"
                           checked={form.isActive}
                           onChange={(e) => updateField("isActive", e.target.checked)}
                         />
                         <span className="toggle-slider"></span>
                         <span className="toggle-label">
                           <span className="toggle-icon">✅</span>
-                          Plan is Active
+                          Active Plan
                         </span>
                       </label>
                     </div>
                   </div>
 
-                  {/* Upgrade/Downgrade Rules */}
-                  <div className="form-section">
-                    <h4 className="section-title">🔄 Plan Transitions</h4>
-                    <div className="transition-grid">
-                      <div className="transition-group">
-                        <label className="transition-label">Allowed Upgrades</label>
-                        <div className="plan-checkboxes">
-                          {availablePlans.map(plan => (
-                            <label key={`upgrade-${plan}`} className="checkbox-item">
-                              <input
-                                type="checkbox"
-                                checked={form.allowedUpgrades.includes(plan)}
-                                onChange={() => togglePlanSelection('allowedUpgrades', plan)}
-                              />
-                              <span className="checkmark"></span>
-                              {plan}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="transition-group">
-                        <label className="transition-label">Allowed Downgrades</label>
-                        <div className="plan-checkboxes">
-                          {availablePlans.map(plan => (
-                            <label key={`downgrade-${plan}`} className="checkbox-item">
-                              <input
-                                type="checkbox"
-                                checked={form.allowedDowngrades.includes(plan)}
-                                onChange={() => togglePlanSelection('allowedDowngrades', plan)}
-                              />
-                              <span className="checkmark"></span>
-                              {plan}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Features */}
-                  <div className="form-section">
+                  <div className="form-group-section">
                     <div className="section-header">
-                      <h4 className="section-title">🎯 Features</h4>
+                      <h4 className="section-title">
+                        <FeatureIcon /> Features
+                      </h4>
                       <button 
                         type="button" 
-                        className="add-feature-btn"
+                        className="btn btn-secondary add-feature-btn"
                         onClick={addFeature}
                       >
-                        ➕ Add Feature
+                        <PlusIcon /> Add Feature
                       </button>
                     </div>
                     
-                    <div className="features-list">
+                    <div className="features-container">
                       {form.features.map((feature, index) => (
                         <div key={index} className="feature-item">
-                          <div className="feature-inputs">
+                          <div className="feature-content">
                             <input
                               type="text"
-                              className="feature-text"
-                              placeholder="Enter feature description *"
+                              className="feature-input"
+                              placeholder="Feature description *"
                               value={feature.text}
                               onChange={(e) => updateFeature(index, "text", e.target.value)}
                               required
@@ -759,6 +824,7 @@ function AdminPlans() {
                             <label className="feature-toggle">
                               <input
                                 type="checkbox"
+                                className="toggle-checkbox"
                                 checked={feature.included}
                                 onChange={(e) => updateFeature(index, "included", e.target.checked)}
                               />
@@ -768,31 +834,36 @@ function AdminPlans() {
                           </div>
                           <button
                             type="button"
-                            className="remove-feature-btn"
+                            className="btn-icon remove-feature-btn"
                             onClick={() => removeFeature(index)}
                             disabled={form.features.length === 1}
+                            title="Remove Feature"
                           >
-                            🗑️
+                            <DeleteIcon />
                           </button>
                         </div>
                       ))}
                     </div>
-                    <small className="form-help">
-                      * Feature text is required. Empty features will be automatically removed.
-                    </small>
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Form Actions */}
                   <div className="form-actions">
-                    <button 
-                      type="submit" 
-                      className="submit-btn"
-                      disabled={loading}
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={cancelEdit}
+                      disabled={formLoading}
                     >
-                      {loading ? (
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary submit-btn"
+                      disabled={formLoading}
+                    >
+                      {formLoading ? (
                         <>
-                          <span className="loading-spinner"></span>
-                          Saving...
+                          <LoadingIcon /> Saving...
                         </>
                       ) : editingId ? (
                         'Update Plan'
@@ -808,180 +879,300 @@ function AdminPlans() {
 
           {/* Plans List Section */}
           {activeTab === 'plans' && (
-            <div className="plans-list-section">
-              {plans.length === 0 ? (
-                <div className="empty-plans">
+            <div className="plans-section">
+              {filteredPlans.length === 0 ? (
+                <div className="empty-state">
                   <div className="empty-icon">📋</div>
-                  <h3>No Plans Created</h3>
-                  <p>Get started by creating your first subscription plan</p>
-                  <button 
-                    className="create-first-plan-btn"
-                    onClick={() => setActiveTab('form')}
-                  >
-                    ➕ Create First Plan
-                  </button>
-                </div>
-              ) : isMobile ? (
-                // Mobile Cards View
-                <div className="plans-cards">
-                  {plans.map((plan) => (
-                    <div key={plan._id} className={`plan-card ${!plan.isActive ? 'inactive' : ''}`}>
-                      <div className="plan-card-header">
-                        <div className="plan-name-section">
-                          <span className="plan-icon">{plan.icon || '📦'}</span>
-                          <div>
-                            <h4 className="plan-name">{plan.name}</h4>
-                            <div className="plan-code">{plan.planCode}</div>
-                          </div>
-                          {plan.badge && (
-                            <span className="plan-badge">{plan.badge}</span>
-                          )}
-                        </div>
-                        <div className="plan-flags">
-                          {!plan.isActive && <span className="flag inactive">❌ Inactive</span>}
-                          {plan.popular && <span className="flag popular">⭐ Popular</span>}
-                          {plan.isFreeTrial && <span className="flag trial">🎉 Free Trial</span>}
-                        </div>
-                      </div>
-                      
-                      <div className="plan-card-body">
-                        <div className="plan-pricing">
-                          <div className="price-item">
-                            <span className="price-label">Monthly:</span>
-                            <span className="price-value">₹{plan.monthlyPrice}</span>
-                          </div>
-                          <div className="price-item">
-                            <span className="price-label">Yearly:</span>
-                            <span className="price-value">₹{plan.yearlyPrice}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="plan-limits">
-                          <div className="limit-item">
-                            <span className="limit-label">Users:</span>
-                            <span className="limit-value">{plan.maxUsers}</span>
-                          </div>
-                          <div className="limit-item">
-                            <span className="limit-label">Invoices:</span>
-                            <span className="limit-value">{plan.maxInvoices}/mo</span>
-                          </div>
-                          <div className="limit-item">
-                            <span className="limit-label">Storage:</span>
-                            <span className="limit-value">{plan.storageLimit}MB</span>
-                          </div>
-                        </div>
-                        
-                        {plan.tagline && (
-                          <p className="plan-tagline">{plan.tagline}</p>
-                        )}
-                      </div>
-
-                      <div className="plan-card-actions">
-                        <button
-                          className="btn-action toggle-active"
-                          onClick={() => togglePlanActivation(plan)}
-                        >
-                          {plan.isActive ? '❌ Deactivate' : '✅ Activate'}
-                        </button>
-                        <button
-                          className="btn-action edit"
-                          onClick={() => handleEdit(plan)}
-                        >
-                          ✏️ Edit
-                        </button>
-                        <button
-                          className="btn-action delete"
-                          onClick={() => handleDelete(plan._id)}
-                        >
-                          🗑️ Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  <h3>{searchTerm ? 'No Matching Plans' : 'No Plans Yet'}</h3>
+                  <p>
+                    {searchTerm 
+                      ? 'Try a different search term'
+                      : 'Create your first subscription plan to get started'
+                    }
+                  </p>
+                  {!searchTerm && (
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setActiveTab('form')}
+                    >
+                      <PlusIcon /> Create First Plan
+                    </button>
+                  )}
                 </div>
               ) : (
-                // Desktop Table View
-                <div className="plans-table-container">
-                  <table className="plans-table">
-                    <thead>
-                      <tr>
-                        <th>Plan Name</th>
-                        <th>Code</th>
-                        <th>Monthly</th>
-                        <th>Yearly</th>
-                        <th>Users</th>
-                        <th>Invoices</th>
-                        <th>Storage</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {plans.map((plan) => (
-                        <tr key={plan._id} className={!plan.isActive ? 'inactive-row' : ''}>
-                          <td className="plan-name-cell">
-                            <div className="plan-name-content">
+                <>
+                  {/* Mobile/Tablet Cards View */}
+                  {isMobile || isTablet ? (
+                    <div className="plans-cards">
+                      {filteredPlans.map((plan) => (
+                        <div 
+                          key={plan._id} 
+                          className={`plan-card ${!plan.isActive ? 'inactive' : ''} ${expandedPlan === plan._id ? 'expanded' : ''}`}
+                          onClick={() => isMobile && togglePlanExpansion(plan._id)}
+                        >
+                          <div className="plan-card-header">
+                            <div className="plan-info">
                               <span className="plan-icon">{plan.icon || '📦'}</span>
-                              <div>
+                              <div className="plan-details">
                                 <div className="plan-name">{plan.name}</div>
-                                {plan.badge && (
-                                  <div className="plan-badge-small">{plan.badge}</div>
+                                <div className="plan-code">{plan.planCode}</div>
+                                {plan.tagline && (
+                                  <div className="plan-tagline">{plan.tagline}</div>
                                 )}
-                                <div className="plan-tagline-small">{plan.tagline}</div>
+                              </div>
+                              {plan.badge && (
+                                <span className="plan-badge">{plan.badge}</span>
+                              )}
+                            </div>
+                            <div className="plan-status">
+                              {!plan.isActive && <span className="status-badge inactive">Inactive</span>}
+                              {plan.popular && <span className="status-badge popular">⭐ Popular</span>}
+                              {plan.isFreeTrial && <span className="status-badge trial">🎉 Trial</span>}
+                            </div>
+                          </div>
+
+                          <div className="plan-card-body">
+                            <div className="pricing-info">
+                              <div className="price-item">
+                                <span className="price-label">Monthly</span>
+                                <span className="price-value">₹{plan.monthlyPrice}</span>
+                              </div>
+                              <div className="price-item">
+                                <span className="price-label">Yearly</span>
+                                <span className="price-value">₹{plan.yearlyPrice}</span>
                               </div>
                             </div>
-                          </td>
-                          <td className="plan-code-cell">
-                            <code>{plan.planCode}</code>
-                          </td>
-                          <td className="price-cell">₹{plan.monthlyPrice}</td>
-                          <td className="price-cell">₹{plan.yearlyPrice}</td>
-                          <td className="limit-cell">{plan.maxUsers}</td>
-                          <td className="limit-cell">{plan.maxInvoices}</td>
-                          <td className="limit-cell">{plan.storageLimit}MB</td>
-                          <td className="status-cell">
-                            <div className="status-badges">
-                              {!plan.isActive && (
-                                <span className="status-badge inactive" title="Inactive">❌</span>
-                              )}
-                              {plan.popular && (
-                                <span className="status-badge popular" title="Popular">⭐</span>
-                              )}
-                              {plan.isFreeTrial && (
-                                <span className="status-badge trial" title="Free Trial">🎉</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="actions-cell">
+
+                            {(expandedPlan === plan._id || !isMobile) && (
+                              <>
+                                <div className="limits-info">
+                                  <div className="limit-item">
+                                    <span className="limit-label">Users</span>
+                                    <span className="limit-value">{plan.maxUsers}</span>
+                                  </div>
+                                  <div className="limit-item">
+                                    <span className="limit-label">Invoices</span>
+                                    <span className="limit-value">{plan.maxInvoices}/mo</span>
+                                  </div>
+                                  <div className="limit-item">
+                                    <span className="limit-label">Storage</span>
+                                    <span className="limit-value">{plan.storageLimit}MB</span>
+                                  </div>
+                                </div>
+
+                                {plan.description && (
+                                  <div className="plan-description">
+                                    {plan.description}
+                                  </div>
+                                )}
+
+                                <div className="plan-features">
+                                  <div className="features-count">
+                                    {plan.features?.length || 0} features
+                                  </div>
+                                  <div className="features-preview">
+                                    {plan.features?.slice(0, 3).map((feature, idx) => (
+                                      <div key={idx} className="feature-preview">
+                                        <span className={`feature-indicator ${feature.included ? 'included' : 'excluded'}`}>
+                                          {feature.included ? <CheckIcon /> : <CloseIcon />}
+                                        </span>
+                                        <span className="feature-text">{feature.text}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="plan-card-actions">
                             <div className="action-buttons">
                               <button
-                                className="btn-action toggle-active"
-                                onClick={() => togglePlanActivation(plan)}
+                                className="btn-icon btn-status"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  togglePlanActivation(plan);
+                                }}
                                 title={plan.isActive ? 'Deactivate' : 'Activate'}
+                                disabled={loading}
                               >
                                 {plan.isActive ? '❌' : '✅'}
                               </button>
                               <button
-                                className="btn-action edit"
-                                onClick={() => handleEdit(plan)}
+                                className="btn-icon btn-edit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(plan);
+                                }}
                                 title="Edit Plan"
+                                disabled={loading}
                               >
-                                ✏️
+                                <EditIcon />
                               </button>
                               <button
-                                className="btn-action delete"
-                                onClick={() => handleDelete(plan._id)}
+                                className="btn-icon btn-delete"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(plan._id);
+                                }}
                                 title="Delete Plan"
+                                disabled={loading}
                               >
-                                🗑️
+                                <DeleteIcon />
                               </button>
+                              {isMobile && (
+                                <button
+                                  className="btn-icon btn-expand"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    togglePlanExpansion(plan._id);
+                                  }}
+                                  title={expandedPlan === plan._id ? 'Collapse' : 'Expand'}
+                                >
+                                  {expandedPlan === plan._id ? '▲' : '▼'}
+                                </button>
+                              )}
                             </div>
-                          </td>
-                        </tr>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  ) : (
+                    /* Desktop Table View */
+                    <div className="plans-table-container">
+                      <div className="table-responsive">
+                        <table className="plans-table">
+                          <thead>
+                            <tr>
+                              <th>Plan</th>
+                              <th>Code</th>
+                              <th>Pricing</th>
+                              <th>Limits</th>
+                              <th>Status</th>
+                              <th>Features</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredPlans.map((plan) => (
+                              <tr key={plan._id} className={!plan.isActive ? 'inactive' : ''}>
+                                <td className="plan-cell">
+                                  <div className="plan-info">
+                                    <span className="plan-icon">{plan.icon || '📦'}</span>
+                                    <div className="plan-details">
+                                      <div className="plan-name">
+                                        {plan.name}
+                                        {plan.badge && (
+                                          <span className="plan-badge">{plan.badge}</span>
+                                        )}
+                                      </div>
+                                      <div className="plan-code">{plan.planCode}</div>
+                                      {plan.tagline && (
+                                        <div className="plan-tagline">{plan.tagline}</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="code-cell">
+                                  <code>{plan.planCode}</code>
+                                </td>
+                                <td className="pricing-cell">
+                                  <div className="pricing-info">
+                                    <div className="price-item">
+                                      <span className="price-label">Monthly:</span>
+                                      <span className="price-value">₹{plan.monthlyPrice}</span>
+                                    </div>
+                                    <div className="price-item">
+                                      <span className="price-label">Yearly:</span>
+                                      <span className="price-value">₹{plan.yearlyPrice}</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="limits-cell">
+                                  <div className="limits-info">
+                                    <div className="limit-item">
+                                      <span className="limit-label">Users:</span>
+                                      <span className="limit-value">{plan.maxUsers}</span>
+                                    </div>
+                                    <div className="limit-item">
+                                      <span className="limit-label">Invoices:</span>
+                                      <span className="limit-value">{plan.maxInvoices}</span>
+                                    </div>
+                                    <div className="limit-item">
+                                      <span className="limit-label">Storage:</span>
+                                      <span className="limit-value">{plan.storageLimit}MB</span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="status-cell">
+                                  <div className="status-badges">
+                                    {!plan.isActive && (
+                                      <span className="status-badge inactive" title="Inactive">❌</span>
+                                    )}
+                                    {plan.popular && (
+                                      <span className="status-badge popular" title="Popular">⭐</span>
+                                    )}
+                                    {plan.isFreeTrial && (
+                                      <span className="status-badge trial" title="Free Trial">🎉</span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="features-cell">
+                                  <div className="features-count">
+                                    {plan.features?.length || 0} features
+                                  </div>
+                                </td>
+                                <td className="actions-cell">
+                                  <div className="action-buttons">
+                                    <button
+                                      className="btn-icon btn-status"
+                                      onClick={() => togglePlanActivation(plan)}
+                                      title={plan.isActive ? 'Deactivate' : 'Activate'}
+                                      disabled={loading}
+                                    >
+                                      {plan.isActive ? '❌' : '✅'}
+                                    </button>
+                                    <button
+                                      className="btn-icon btn-edit"
+                                      onClick={() => handleEdit(plan)}
+                                      title="Edit Plan"
+                                      disabled={loading}
+                                    >
+                                      <EditIcon />
+                                    </button>
+                                    <button
+                                      className="btn-icon btn-delete"
+                                      onClick={() => handleDelete(plan._id)}
+                                      title="Delete Plan"
+                                      disabled={loading}
+                                    >
+                                      <DeleteIcon />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Table Summary */}
+                  {filteredPlans.length > 0 && (
+                    <div className="table-summary">
+                      <div className="summary-info">
+                        Showing {filteredPlans.length} of {plans.length} plans
+                      </div>
+                      <button 
+                        className="btn btn-primary"
+                        onClick={() => setActiveTab('form')}
+                      >
+                        <PlusIcon /> Create New Plan
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

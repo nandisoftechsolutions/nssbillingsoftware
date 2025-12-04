@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import "./ContactUs.css";
+import api from "../../utils/api";
 
 // ⭐ Correct working import (Vite + Vercel)
 import nandiLogo from "../../assets/nandibillinglogo.png";
@@ -13,31 +14,34 @@ function ContactUs() {
   // SEO Configuration for Contact Page
   const seoConfig = {
     title: "Contact Nandi Billing - Get GST Billing Software Demo & Support",
-    description: "Get in touch with Nandi Billing team for software demo, GST billing support, pricing queries. Call +91 8152853260, WhatsApp or email for quick assistance.",
-    keywords: "contact Nandi Billing, GST software support, billing software demo, Nandi contact, software pricing inquiry, customer support",
+    description:
+      "Get in touch with Nandi Billing team for software demo, GST billing support, pricing queries. Call +91 8152853260, WhatsApp or email for quick assistance.",
+    keywords:
+      "contact Nandi Billing, GST software support, billing software demo, Nandi contact, software pricing inquiry, customer support",
     canonical: `${SITE_URL}/contact`,
-    ogImage: `${SITE_URL}/images/contact-og-image.jpg`
+    ogImage: `${SITE_URL}/images/contact-og-image.jpg`,
   };
 
   // Structured Data for Contact Page
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "Contact Nandi Billing Software",
-    "description": "Contact page for Nandi Billing Software - GST billing and inventory management solution",
-    "url": `${SITE_URL}/contact`,
-    "mainEntity": {
+    name: "Contact Nandi Billing Software",
+    description:
+      "Contact page for Nandi Billing Software - GST billing and inventory management solution",
+    url: `${SITE_URL}/contact`,
+    mainEntity: {
       "@type": "Organization",
-      "name": "Nandi Softech Solutions",
-      "contactPoint": {
+      name: "Nandi Softech Solutions",
+      contactPoint: {
         "@type": "ContactPoint",
-        "telephone": "+91-8152853260",
-        "email": "arjun@nandisoftechsolutions.in",
-        "contactType": "customer service",
-        "areaServed": "IN",
-        "availableLanguage": ["English", "Hindi", "Kannada"]
-      }
-    }
+        telephone: "+91-8152853260",
+        email: "arjun@nandisoftechsolutions.in",
+        contactType: "customer service",
+        areaServed: "IN",
+        availableLanguage: ["English", "Hindi", "Kannada"],
+      },
+    },
   };
 
   const [formData, setFormData] = useState({
@@ -51,6 +55,36 @@ function ContactUs() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // FULL API Submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const res = await api.post("/contact/submit", formData);
+
+      if (res.data.success) {
+        alert("Thank you! Your message was submitted successfully.");
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          company: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        alert(res.data.message || "Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      console.error("Contact Submit Error:", err);
+      alert("Server error! Please try again later.");
+    }
+
+    setIsSubmitting(false);
+  };
+
+  // Handle text input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -58,24 +92,7 @@ function ContactUs() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    setTimeout(() => {
-      alert("Thank you for your message! We will get back to you soon.");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        subject: "",
-        message: "",
-      });
-      setIsSubmitting(false);
-    }, 2000);
-  };
-
+  // Contact action cards
   const contactMethods = [
     {
       icon: "📧",
@@ -107,6 +124,7 @@ function ContactUs() {
     },
   ];
 
+  // FAQs
   const faqs = [
     {
       question: "Do you offer a free trial?",
@@ -120,8 +138,7 @@ function ContactUs() {
     },
     {
       question: "Can I access it from mobile?",
-      answer:
-        "Yes, securely from desktop, laptop, tablet, and mobile.",
+      answer: "Yes, securely from desktop, laptop, tablet, and mobile.",
     },
     {
       question: "Do you provide onboarding?",
@@ -132,19 +149,16 @@ function ContactUs() {
 
   return (
     <>
-      {/* ========== REACT HELMET SEO ========== */}
+      {/* ❇ SEO Helmet */}
       <Helmet>
-        {/* === BASIC META TAGS === */}
         <title>{seoConfig.title}</title>
         <meta name="description" content={seoConfig.description} />
         <meta name="keywords" content={seoConfig.keywords} />
         <meta name="robots" content="index, follow" />
         <meta name="author" content="Nandi Softech Solutions" />
-        
-        {/* === CANONICAL URL === */}
+
         <link rel="canonical" href={seoConfig.canonical} />
-        
-        {/* === OPEN GRAPH TAGS === */}
+
         <meta property="og:title" content={seoConfig.title} />
         <meta property="og:description" content={seoConfig.description} />
         <meta property="og:image" content={seoConfig.ogImage} />
@@ -152,55 +166,50 @@ function ContactUs() {
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Nandi Billing Software" />
         <meta property="og:locale" content="en_IN" />
-        
-        {/* === TWITTER CARD TAGS === */}
+
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoConfig.title} />
         <meta name="twitter:description" content={seoConfig.description} />
         <meta name="twitter:image" content={seoConfig.ogImage} />
         <meta name="twitter:site" content="@nandibilling" />
-        
-        {/* === ADDITIONAL SEO META TAGS === */}
+
         <meta name="language" content="English" />
         <meta name="geo.region" content="IN-KA" />
         <meta name="geo.placename" content="Bangalore, Karnataka" />
-        
-        {/* === STRUCTURED DATA (JSON-LD) === */}
+
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
-        
-        {/* === LOCAL BUSINESS STRUCTURED DATA === */}
+
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Nandi Softech Solutions",
-            "url": SITE_URL,
-            "logo": `${SITE_URL}/images/logo.png`,
-            "description": "Provider of India's best GST billing and inventory management software",
-            "address": {
+            name: "Nandi Softech Solutions",
+            url: SITE_URL,
+            logo: `${SITE_URL}/images/logo.png`,
+            description:
+              "Provider of India's best GST billing and inventory management software",
+            address: {
               "@type": "PostalAddress",
-              "addressLocality": "Bangalore",
-              "addressRegion": "Karnataka",
-              "addressCountry": "IN"
+              addressLocality: "Bangalore",
+              addressRegion: "Karnataka",
+              addressCountry: "IN",
             },
-            "contactPoint": {
+            contactPoint: {
               "@type": "ContactPoint",
-              "telephone": "+91-8152853260",
-              "email": "arjun@nandisoftechsolutions.in",
-              "contactType": "customer service",
-              "areaServed": "IN",
-              "availableLanguage": ["English", "Hindi", "Kannada"]
+              telephone: "+91-8152853260",
+              email: "arjun@nandisoftechsolutions.in",
+              contactType: "customer service",
+              areaServed: "IN",
+              availableLanguage: ["English", "Hindi", "Kannada"],
             },
-            "sameAs": [
-              "https://www.youtube.com/@NandiSoftechSolutions"
-            ]
+            sameAs: ["https://www.youtube.com/@NandiSoftechSolutions"],
           })}
         </script>
       </Helmet>
 
-      {/* ========== CONTACT PAGE CONTENT ========== */}
+      {/* CONTENT */}
       <div className="nandiContact-page">
         {/* HERO */}
         <section className="nandiContact-hero">
@@ -216,7 +225,9 @@ function ContactUs() {
                     loading="eager"
                   />
                   <div>
-                    <p className="nandiContact-brandName">Nandi Billing Software</p>
+                    <p className="nandiContact-brandName">
+                      Nandi Billing Software
+                    </p>
                     <p className="nandiContact-brandTagline">
                       GST Ready Billing & Inventory Solution
                     </p>
@@ -224,11 +235,14 @@ function ContactUs() {
                 </div>
 
                 <h1 className="nandiContact-heroTitle">
-                  Get in <span className="nandiContact-gradientText">Touch</span> with Us
+                  Get in{" "}
+                  <span className="nandiContact-gradientText">Touch</span> with
+                  Us
                 </h1>
 
                 <p className="nandiContact-heroSubtitle">
-                  We're here to help you grow your business with our GST billing software solutions.
+                  We're here to help you grow your business with our GST billing
+                  software solutions.
                 </p>
 
                 <div className="nandiContact-heroStats">
@@ -266,7 +280,9 @@ function ContactUs() {
 
                   <div className="nandiContact-heroCard">
                     <div className="nandiContact-heroCardHeader">
-                      <span className="nandiContact-heroBadge">Support Center</span>
+                      <span className="nandiContact-heroBadge">
+                        Support Center
+                      </span>
                     </div>
 
                     <div className="nandiContact-heroCardBody">
@@ -282,7 +298,8 @@ function ContactUs() {
                     </div>
 
                     <div className="nandiContact-heroFooter">
-                      <span className="nandiContact-onlineDot"></span> Live Support
+                      <span className="nandiContact-onlineDot"></span> Live
+                      Support
                     </div>
                   </div>
                 </div>
@@ -295,9 +312,12 @@ function ContactUs() {
         <section className="nandiContact-methodSection">
           <div className="container">
             <div className="text-center mb-5">
-              <h2 className="nandiContact-sectionTitle">Multiple Ways to Connect</h2>
+              <h2 className="nandiContact-sectionTitle">
+                Multiple Ways to Connect
+              </h2>
               <p className="nandiContact-sectionSubtitle">
-                Choose the best way to contact us for GST billing software support and inquiries.
+                Choose the best way to contact us for GST billing software
+                support and inquiries.
               </p>
             </div>
 
@@ -307,15 +327,29 @@ function ContactUs() {
                   <a
                     href={method.link}
                     className="nandiContact-methodCard"
-                    target={method.link.startsWith("http") ? "_blank" : "_self"}
-                    rel={method.link.startsWith("http") ? "noopener noreferrer" : ""}
+                    target={
+                      method.link.startsWith("http") ? "_blank" : "_self"
+                    }
+                    rel={
+                      method.link.startsWith("http")
+                        ? "noopener noreferrer"
+                        : ""
+                    }
                     title={`Contact Nandi Billing via ${method.title}`}
                     aria-label={`Contact Nandi Billing via ${method.title}: ${method.details}`}
                   >
-                    <div className="nandiContact-methodIcon">{method.icon}</div>
-                    <h3 className="nandiContact-methodTitle">{method.title}</h3>
-                    <p className="nandiContact-methodDetails">{method.details}</p>
-                    <p className="nandiContact-methodDescription">{method.description}</p>
+                    <div className="nandiContact-methodIcon">
+                      {method.icon}
+                    </div>
+                    <h3 className="nandiContact-methodTitle">
+                      {method.title}
+                    </h3>
+                    <p className="nandiContact-methodDetails">
+                      {method.details}
+                    </p>
+                    <p className="nandiContact-methodDescription">
+                      {method.description}
+                    </p>
                     <div className="nandiContact-methodArrow">→</div>
                   </a>
                 </div>
@@ -324,7 +358,7 @@ function ContactUs() {
           </div>
         </section>
 
-        {/* FORM */}
+        {/* CONTACT FORM */}
         <section className="nandiContact-formSection" id="contact-form">
           <div className="container">
             <div className="row gy-4">
@@ -332,10 +366,13 @@ function ContactUs() {
                 <div className="nandiContact-formCard">
                   <h3 className="nandiContact-formTitle">Send Us a Message</h3>
                   <p className="nandiContact-formSubtitle">
-                    Fill out the form below and our team will get back to you within 2 hours.
+                    Fill out the form below and our team will get back to you
+                    within 2 hours.
                   </p>
 
                   <form onSubmit={handleSubmit}>
+                    {/* ----------------  FORM INPUTS  ---------------- */}
+
                     <div className="row">
                       <div className="col-md-6">
                         <div className="nandiContact-formGroup">
@@ -440,7 +477,11 @@ function ContactUs() {
                       type="submit"
                       className="nandiContact-submitBtn"
                       disabled={isSubmitting}
-                      aria-label={isSubmitting ? "Sending your message" : "Send message to Nandi Billing"}
+                      aria-label={
+                        isSubmitting
+                          ? "Sending your message"
+                          : "Send message to Nandi Billing"
+                      }
                     >
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </button>
@@ -457,16 +498,10 @@ function ContactUs() {
                     <div className="nandiContact-infoIcon">📧</div>
                     <div className="nandiContact-infoContent">
                       <h5>Email</h5>
-                      <a 
-                        href="mailto:arjun@nandisoftechsolutions.in"
-                        title="Email Nandi Billing Support"
-                      >
+                      <a href="mailto:arjun@nandisoftechsolutions.in">
                         arjun@nandisoftechsolutions.in
                       </a>
-                      <a 
-                        href="mailto:support@nandisoftechsolutions.in"
-                        title="Email Nandi Billing Support Team"
-                      >
+                      <a href="mailto:support@nandisoftechsolutions.in">
                         support@nandisoftechsolutions.in
                       </a>
                     </div>
@@ -476,12 +511,7 @@ function ContactUs() {
                     <div className="nandiContact-infoIcon">📞</div>
                     <div className="nandiContact-infoContent">
                       <h5>Phone</h5>
-                      <a 
-                        href="tel:+918152853260"
-                        title="Call Nandi Billing Support"
-                      >
-                        +91 8152853260
-                      </a>
+                      <a href="tel:+918152853260">+91 8152853260</a>
                     </div>
                   </div>
 
@@ -503,7 +533,8 @@ function ContactUs() {
                   </div>
 
                   <p className="mt-3 small">
-                    For urgent GST billing software issues, call or WhatsApp us directly.
+                    For urgent GST billing software issues, call or WhatsApp us
+                    directly.
                   </p>
                 </div>
               </div>
@@ -515,7 +546,9 @@ function ContactUs() {
         <section className="nandiContact-faqSection">
           <div className="container">
             <div className="text-center mb-5">
-              <h2 className="nandiContact-sectionTitle">Frequently Asked Questions</h2>
+              <h2 className="nandiContact-sectionTitle">
+                Frequently Asked Questions
+              </h2>
               <p className="nandiContact-sectionSubtitle">
                 Common questions about Nandi Billing Software answered
               </p>
@@ -526,7 +559,9 @@ function ContactUs() {
                 <div className="nandiContact-faqList">
                   {faqs.map((faq, index) => (
                     <div key={index} className="nandiContact-faqItem">
-                      <h3 className="nandiContact-faqQuestion">{faq.question}</h3>
+                      <h3 className="nandiContact-faqQuestion">
+                        {faq.question}
+                      </h3>
                       <p className="nandiContact-faqAnswer">{faq.answer}</p>
                     </div>
                   ))}
@@ -535,13 +570,8 @@ function ContactUs() {
                 <div className="text-center mt-4">
                   <p className="nandiContact-moreHelp">
                     Still need help?{" "}
-                    <a href="#contact-form" title="Contact Nandi Billing Support">
-                      Send us a message
-                    </a>{" "}
-                    or{" "}
-                    <Link to="/pricing" title="View Nandi Billing Pricing">
-                      check pricing
-                    </Link>.
+                    <a href="#contact-form">Send us a message</a> or{" "}
+                    <Link to="/pricing">check pricing</Link>.
                   </p>
                 </div>
               </div>
@@ -559,21 +589,22 @@ function ContactUs() {
                     Ready to Start with Nandi Billing Software?
                   </h2>
                   <p className="nandiContact-ctaSubtitle">
-                    Join thousands of smart businesses using Nandi Softech Solutions for GST billing and inventory management.
+                    Join thousands of smart businesses using Nandi Softech
+                    Solutions for GST billing and inventory management.
                   </p>
                 </div>
 
                 <div className="col-lg-4 text-lg-end">
-                  <Link 
-                    to="/register" 
+                  <Link
+                    to="/register"
                     className="btn btn-light btn-lg me-2"
                     title="Start Free Trial - Nandi Billing"
                   >
                     Start Free Trial
                   </Link>
 
-                  <Link 
-                    to="/pricing" 
+                  <Link
+                    to="/pricing"
                     className="btn btn-outline-light btn-lg mt-2 mt-lg-0"
                     title="View Pricing Plans - Nandi Billing"
                   >

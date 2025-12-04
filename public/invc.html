@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GST Tax Invoice</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f3f4f6;
+    }
+
+    .invoice-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .invoice-title {
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #111827;
+    }
+
+    .logo-box {
+      text-align: right;
+      font-weight: 600;
+      font-size: 18px;
+      text-transform: uppercase;
+    }
+
+    .logo-box span {
+      display: block;
+      font-size: 13px;
+      font-weight: 400;
+      color: #6b7280;
+    }
+
+    .section {
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .small-text {
+      font-size: 12px;
+      color: #374151;
+    }
+
+    .muted-text {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .flex-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .flex-column {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .border-box {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 8px 10px;
+    }
+
+    .key-value-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .key {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .value {
+      text-align: right;
+      color: #111827;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    table thead tr {
+      background: #111827;
+      color: #ffffff;
+    }
+
+    table th, table td {
+      border: 1px solid #d1d5db;
+      padding: 6px 5px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table th {
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    table td.numeric {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .totals-row th,
+    .totals-row td {
+      font-weight: 600;
+      background: #f9fafb;
+    }
+
+    .amount-in-words {
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .footer-box {
+      flex: 1;
+    }
+
+    .sign-box {
+      text-align: right;
+      margin-top: 40px;
+      font-size: 12px;
+    }
+
+    .sign-line {
+      margin-top: 30px;
+      border-top: 1px solid #4b5563;
+      display: inline-block;
+      padding-top: 4px;
+    }
+
+    .bank-details {
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .terms-list {
+      margin: 4px 0 0 14px;
+      padding: 0;
+      font-size: 11px;
+    }
+
+    .terms-list li {
+      margin-bottom: 2px;
+    }
+
+    .print-note {
+      text-align: center;
+      font-size: 10px;
+      margin-top: 16px;
+      color: #9ca3af;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+        margin: 0;
+      }
+
+      .invoice-container {
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+      }
+
+      .print-note {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="invoice-container">
+    <!-- Header -->
+    <div class="invoice-header">
+      <div>
+        <div class="invoice-title">Tax Invoice</div>
+        <div class="muted-text">(Issued under GST Rules)</div>
+      </div>
+      <div class="logo-box">
+        Nandi Softech Solutions
+        <span>Software | IT Services | Training</span>
+      </div>
+    </div>
+
+    <!-- Supplier & Invoice Details -->
+    <div class="flex-row section">
+      <div class="border-box" style="flex: 1.3;">
+        <div class="section-title">Supplier Details</div>
+        <div class="small-text flex-column">
+          <strong>Nandi Softech Solutions</strong>
+          <span>No. 21, 3rd Floor, Tech Park Road</span>
+          <span>Vijayapura, Karnataka - 586101</span>
+          <span>State: Karnataka (Code: 29)</span>
+          <span>GSTIN: 29ABCDE1234F1Z5</span>
+          <span>Phone: +91-98765 43210</span>
+          <span>Email: billing@nandisoftech.com</span>
+        </div>
+      </div>
+
+      <div class="border-box" style="flex: 1;">
+        <div class="section-title">Invoice Details</div>
+        <div class="key-value-row">
+          <span class="key">Invoice No.</span>
+          <span class="value">NST/24-25/0012</span>
+        </div>
+        <div class="key-value-row">
+          <span class="key">Invoice Date</span>
+          <span class="value">03-Dec-2025</span>
+        </div>
+        <div class="key-value-row">
+          <span class="key">Place of Supply</span>
+          <span class="value">Karnataka (29)</span>
+        </div>
+        <div class="key-value-row">
+          <span class="key">Due Date</span>
+          <span class="value">18-Dec-2025</span>
+        </div>
+        <div class="key-value-row">
+          <span class="key">PO/Ref No.</span>
+          <span class="value">PO-7845 / 28-Nov-2025</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing & Shipping -->
+    <div class="flex-row section">
+      <div class="border-box" style="flex: 1;">
+        <div class="section-title">Bill To (Recipient)</div>
+        <div class="small-text flex-column">
+          <strong>Ram Café Pvt. Ltd.</strong>
+          <span>2nd Floor, Food Street</span>
+          <span>Basavanagudi, Bengaluru - 560004</span>
+          <span>State: Karnataka (Code: 29)</span>
+          <span>GSTIN: 29AAACR7890L1Z3</span>
+          <span>Contact: +91-90123 45678</span>
+        </div>
+      </div>
+
+      <div class="border-box" style="flex: 1;">
+        <div class="section-title">Ship To (If different)</div>
+        <div class="small-text flex-column">
+          <strong>Ram Café - Jayanagar Outlet</strong>
+          <span>4th Block, Jayanagar</span>
+          <span>Bengaluru - 560041</span>
+          <span>State: Karnataka (Code: 29)</span>
+          <span>GSTIN: 29AAACR7890L1Z3</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <div class="section">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 4%;">#</th>
+            <th style="width: 22%;">Description of Service</th>
+            <th style="width: 10%;">HSN/SAC</th>
+            <th style="width: 10%;">Qty</th>
+            <th style="width: 10%;">UOM</th>
+            <th style="width: 11%;">Rate (₹)</th>
+            <th style="width: 9%;">Taxable Value (₹)</th>
+            <th style="width: 8%;">CGST</th>
+            <th style="width: 8%;">SGST</th>
+            <th style="width: 8%;">IGST</th>
+            <th style="width: 10%;">Line Total (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ITEM 1 -->
+          <tr>
+            <td class="text-center">1</td>
+            <td>
+              Custom Billing Software Development<br />
+              <span class="muted-text">Module-wise development and deployment for Ram Café billing system</span>
+            </td>
+            <td class="text-center">998313</td>
+            <td class="numeric">1.00</td>
+            <td class="text-center">Lot</td>
+            <td class="numeric">80,000.00</td>
+            <td class="numeric">80,000.00</td>
+            <td class="numeric">9% (7,200.00)</td>
+            <td class="numeric">9% (7,200.00)</td>
+            <td class="numeric">0%</td>
+            <td class="numeric">94,400.00</td>
+          </tr>
+
+          <!-- ITEM 2 -->
+          <tr>
+            <td class="text-center">2</td>
+            <td>
+              Annual Maintenance (AMC) – Billing Software<br />
+              <span class="muted-text">Bug fixes, performance tuning & small feature updates</span>
+            </td>
+            <td class="text-center">998314</td>
+            <td class="numeric">12.00</td>
+            <td class="text-center">Month</td>
+            <td class="numeric">3,000.00</td>
+            <td class="numeric">36,000.00</td>
+            <td class="numeric">9% (3,240.00)</td>
+            <td class="numeric">9% (3,240.00)</td>
+            <td class="numeric">0%</td>
+            <td class="numeric">42,480.00</td>
+          </tr>
+
+          <!-- ITEM 3 -->
+          <tr>
+            <td class="text-center">3</td>
+            <td>
+              On-site Training for Staff<br />
+              <span class="muted-text">Two days in-person training on software usage</span>
+            </td>
+            <td class="text-center">999293</td>
+            <td class="numeric">2.00</td>
+            <td class="text-center">Day</td>
+            <td class="numeric">5,000.00</td>
+            <td class="numeric">10,000.00</td>
+            <td class="numeric">9% (900.00)</td>
+            <td class="numeric">9% (900.00)</td>
+            <td class="numeric">0%</td>
+            <td class="numeric">11,800.00</td>
+          </tr>
+
+          <!-- Subtotal Rows -->
+          <tr class="totals-row">
+            <td colspan="6" class="numeric">Total Taxable Value</td>
+            <td class="numeric">1,26,000.00</td>
+            <td class="numeric">11,340.00</td>
+            <td class="numeric">11,340.00</td>
+            <td class="numeric">0.00</td>
+            <td class="numeric">1,48,680.00</td>
+          </tr>
+
+          <tr>
+            <td colspan="10" class="numeric"><strong>Round Off</strong></td>
+            <td class="numeric">0.00</td>
+          </tr>
+          <tr class="totals-row">
+            <td colspan="10" class="numeric"><strong>Invoice Total (₹)</strong></td>
+            <td class="numeric"><strong>1,48,680.00</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="amount-in-words">
+        <strong>Amount in Words:</strong>
+        One Lakh Forty Eight Thousand Six Hundred Eighty Rupees Only.
+      </div>
+    </div>
+
+    <!-- Tax Summary -->
+    <div class="section">
+      <div class="section-title">GST Tax Summary</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tax Type</th>
+            <th class="numeric">Taxable Value (₹)</th>
+            <th class="numeric">Rate</th>
+            <th class="numeric">Tax Amount (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CGST</td>
+            <td class="numeric">1,26,000.00</td>
+            <td class="numeric">9%</td>
+            <td class="numeric">11,340.00</td>
+          </tr>
+          <tr>
+            <td>SGST</td>
+            <td class="numeric">1,26,000.00</td>
+            <td class="numeric">9%</td>
+            <td class="numeric">11,340.00</td>
+          </tr>
+          <tr>
+            <td>IGST</td>
+            <td class="numeric">0.00</td>
+            <td class="numeric">0%</td>
+            <td class="numeric">0.00</td>
+          </tr>
+          <tr class="totals-row">
+            <td><strong>Total</strong></td>
+            <td class="numeric"><strong>1,26,000.00</strong></td>
+            <td></td>
+            <td class="numeric"><strong>22,680.00</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer: Bank, Terms, Signature -->
+    <div class="footer">
+      <div class="footer-box border-box">
+        <div class="section-title">Bank Details</div>
+        <div class="bank-details">
+          <div><strong>Bank Name:</strong> State Bank of India</div>
+          <div><strong>Branch:</strong> Vijayapura Main Branch</div>
+          <div><strong>Account Name:</strong> Nandi Softech Solutions</div>
+          <div><strong>Account No.:</strong> 123456789012</div>
+          <div><strong>IFSC Code:</strong> SBIN0001234</div>
+          <div><strong>Mode of Payment:</strong> NEFT / RTGS / UPI</div>
+        </div>
+      </div>
+
+      <div class="footer-box border-box">
+        <div class="section-title">Terms &amp; Conditions</div>
+        <ul class="terms-list">
+          <li>Goods/Services once delivered will not be taken back.</li>
+          <li>Interest @ 18% p.a. will be charged on delayed payments.</li>
+          <li>All disputes are subject to Vijayapura jurisdiction only.</li>
+          <li>This is a system-generated invoice and does not require a physical signature.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sign-box">
+      <div>For <strong>Nandi Softech Solutions</strong></div>
+      <div class="sign-line">Authorised Signatory</div>
+    </div>
+
+    <div class="print-note">
+      *** Thank you for your business! ***
+    </div>
+  </div>
+</body>
+</html>

@@ -80,7 +80,7 @@ function AdminFooter() {
             <ul className="footer-links">
               <li><Link to="/pricing">💳 Pricing Plans</Link></li>
               <li><Link to="/refund-policy">🔄 Refund Policy</Link></li>
-              <li><Link to="/privacy-policy">🔒 Privacy Policy</Link></li>
+              <li><Link to="/privacy">🔒 Privacy Policy</Link></li>
               <li><Link to="/terms">📄 Terms & Conditions</Link></li>
               <li><Link to="/blog">📝 Blog</Link></li>
               <li><Link to="/contact">📞 Contact</Link></li>
@@ -90,7 +90,7 @@ function AdminFooter() {
             <ul className="footer-links">
               <li><Link to="/login">🔑 User Login</Link></li>
               <li><Link to="/register">📝 Register</Link></li>
-              <li><Link to="/support">🆘 Support</Link></li>
+              <li><Link to="/contact">🆘 Support</Link></li>
               <li><Link to="/about">ℹ️ About Us</Link></li>
             </ul>
           </div>
@@ -99,17 +99,17 @@ function AdminFooter() {
           <div className="footer-section">
             <h5>Our Services</h5>
             <ul className="footer-links">
-              <li><Link to="/billing-software">🧾 Billing Software</Link></li>
-              <li><Link to="/gst-software">📊 GST Software</Link></li>
-              <li><Link to="/inventory-software">📦 Inventory Software</Link></li>
-              <li><Link to="/pos-software">💳 POS Software</Link></li>
+              <li><Link to="/register">🧾 Billing Software</Link></li>
+              <li><Link to="/register">📊 GST Software</Link></li>
+              <li><Link to="/register">📦 Inventory Software</Link></li>
+              <li><Link to="/register">💳 POS Software</Link></li>
             </ul>
 
             <h5 className="footer-subtitle">GST Services</h5>
             <ul className="footer-links">
-              <li><Link to="/gst-registration">📝 GST Registration</Link></li>
-              <li><Link to="/gst-filing">📄 GST Filing</Link></li>
-              <li><Link to="/gst-return">📋 GST Return</Link></li>
+              <li><Link to="/gst">📝 GST Registration</Link></li>
+              <li><Link to="/gst">📄 GST Filing</Link></li>
+              <li><Link to="/gst">📋 GST Return</Link></li>
             </ul>
           </div>
         </div>

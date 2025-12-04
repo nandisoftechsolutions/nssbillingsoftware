@@ -31,6 +31,7 @@ function AdminTenants() {
     suspended: 0,
     trial: 0
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   // Plan options
@@ -401,9 +402,29 @@ function AdminTenants() {
     return "Active";
   };
 
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   return (
     <div className="tenants-admin-layout">
-      <AdminSidebar />
+      {/* Mobile Header */}
+      <div className="tenants-mobile-header">
+        <button className="tenants-mobile-menu-btn" onClick={toggleMobileMenu}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <h1 className="tenants-mobile-title">Tenants</h1>
+        <button 
+          className="tenants-refresh-btn mobile" 
+          onClick={fetchTenants} 
+          disabled={loading}
+        >
+          {loading ? "⟳" : "↻"}
+        </button>
+      </div>
 
       <main className="tenants-admin-main">
         <header className="tenants-admin-header">
@@ -793,6 +814,9 @@ function AdminTenants() {
           )}
         </div>
       </main>
+
+      {/* Sidebar */}
+      <AdminSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
     </div>
   );
 }

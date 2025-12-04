@@ -1,4 +1,3 @@
-// src/pages/MainAdmin/AdminDashboard.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/AdminSidebar";
@@ -8,7 +7,7 @@ import "./AdminDashboard.css";
 function AdminDashboard() {
   const [stats, setStats] = useState({
     // Tenant stats
-    tenants: 0,
+    totalTenants: 0,
     activeTenants: 0,
     expiredTenants: 0,
     newTenantsToday: 0,
@@ -21,17 +20,28 @@ function AdminDashboard() {
     planUpgradeCount: 0,
     planCancellationCount: 0,
 
-    // Email / reminder stats
+    // Revenue & Invoices
+    totalRevenue: 0,
+    totalInvoices: 0,
+
+    // Plan stats
+    totalPlans: 0,
+    activePlansCount: 0,
+
+    // Email stats
     expiryEmailsSent: 0,
     renewalRemindersSent: 0,
     autoCronNotificationsSent: 0,
 
-    // Revenue
-    revenue: 0,
+    // Recent activities data
+    recentTenants: [],
+    recentPayments: []
   });
 
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const todayLabel = new Date().toLocaleDateString("en-IN", {
@@ -64,48 +74,255 @@ function AdminDashboard() {
 
   const loadStats = async () => {
     setLoading(true);
+    setHasError(false);
+    setErrorMessage("");
+    
     try {
-      const { data } = await api.get("/admin/overview", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
-      });
+      console.log("🔄 Loading admin overview stats...");
+      
+      const response = await api.get("/admin/overview");
+      
+      if (response.data.success) {
+        console.log("✅ Admin stats loaded successfully:", response.data);
+        
+        // Generate recent activities from available data
+        const recentTenants = generateRecentActivities(response.data);
+        
+        setStats({
+          // Tenant stats
+          totalTenants: response.data?.totalTenants ?? 0,
+          activeTenants: response.data?.activeTenants ?? 0,
+          expiredTenants: response.data?.expiredTenants ?? 0,
+          newTenantsToday: response.data?.newTenantsToday ?? 0,
+          newTenantsThisMonth: response.data?.newTenantsThisMonth ?? 0,
 
-      setStats({
-        // Tenant stats
-        tenants: data?.tenants ?? 0,
-        activeTenants: data?.activeTenants ?? 0,
-        expiredTenants: data?.expiredTenants ?? 0,
-        newTenantsToday: data?.newTenantsToday ?? 0,
-        newTenantsThisMonth: data?.newTenantsThisMonth ?? 0,
+          // Subscription stats
+          activePlans: response.data?.activePlans ?? 0,
+          expiredPlans: response.data?.expiredPlans ?? 0,
+          trialUsers: response.data?.trialUsers ?? 0,
+          planUpgradeCount: response.data?.planUpgradeCount ?? 0,
+          planCancellationCount: response.data?.planCancellationCount ?? 0,
 
-        // Subscription stats
-        activePlans: data?.activePlans ?? 0,
-        expiredPlans: data?.expiredPlans ?? 0,
-        trialUsers: data?.trialUsers ?? 0,
-        planUpgradeCount: data?.planUpgradeCount ?? 0,
-        planCancellationCount: data?.planCancellationCount ?? 0,
+          // Revenue & Invoices
+          totalRevenue: response.data?.totalRevenue ?? 0,
+          totalInvoices: response.data?.totalInvoices ?? 0,
 
-        // Email & reminder stats
-        expiryEmailsSent: data?.expiryEmailsSent ?? 0,
-        renewalRemindersSent: data?.renewalRemindersSent ?? 0,
-        autoCronNotificationsSent: data?.autoCronNotificationsSent ?? 0,
+          // Plan stats
+          totalPlans: response.data?.totalPlans ?? 0,
+          activePlansCount: response.data?.activePlansCount ?? 0,
 
-        // Revenue
-        revenue: data?.revenue ?? 0,
-      });
+          // Email stats
+          expiryEmailsSent: response.data?.expiryEmailsSent ?? 0,
+          renewalRemindersSent: response.data?.renewalRemindersSent ?? 0,
+          autoCronNotificationsSent: response.data?.autoCronNotificationsSent ?? 0,
+
+          // Recent activities
+          recentTenants: recentTenants,
+          recentPayments: []
+        });
+      } else {
+        console.error("❌ Failed to load admin stats:", response.data);
+        throw new Error(response.data?.message || "Failed to load admin statistics");
+      }
     } catch (err) {
-      console.error("Admin dashboard error:", err);
-      alert("Failed to load admin stats. Please try again later.");
+      console.error("❌ Admin dashboard error:", err);
+      
+      // Set error state
+      setHasError(true);
+      setErrorMessage(
+        err.response?.data?.message || 
+        err.message || 
+        "Database connection failed. Showing demo data."
+      );
+      
+      // Load demo data when API fails
+      loadDemoData();
     } finally {
       setLoading(false);
     }
+  };
+
+  // Load demo data when API is unavailable
+  const loadDemoData = () => {
+    console.log("📊 Loading demo data...");
+    
+    const demoStats = {
+      // Tenant stats
+      totalTenants: 24,
+      activeTenants: 18,
+      expiredTenants: 6,
+      newTenantsToday: 2,
+      newTenantsThisMonth: 8,
+
+      // Subscription stats
+      activePlans: 15,
+      expiredPlans: 3,
+      trialUsers: 5,
+      planUpgradeCount: 7,
+      planCancellationCount: 2,
+
+      // Revenue & Invoices
+      totalRevenue: 125000,
+      totalInvoices: 45,
+
+      // Plan stats
+      totalPlans: 4,
+      activePlansCount: 3,
+
+      // Email stats
+      expiryEmailsSent: 12,
+      renewalRemindersSent: 8,
+      autoCronNotificationsSent: 25,
+
+      // Recent activities
+      recentTenants: [
+        {
+          name: "Tech Solutions Inc",
+          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          subscriptionStatus: 'active'
+        },
+        {
+          name: "Global Enterprises",
+          createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+          subscriptionStatus: 'trial'
+        },
+        {
+          name: "StartUp Innovations",
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          subscriptionStatus: 'active'
+        },
+        {
+          name: "2 New Tenants Today",
+          createdAt: new Date().toISOString(),
+          subscriptionStatus: 'new'
+        },
+        {
+          name: "7 Plan Upgrades",
+          createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+          subscriptionStatus: 'upgraded'
+        }
+      ],
+      recentPayments: []
+    };
+    
+    setStats(demoStats);
+  };
+
+  // Generate recent activities based on available data
+  const generateRecentActivities = (data) => {
+    const activities = [];
+    
+    // Add new tenants today
+    if (data.newTenantsToday > 0) {
+      activities.push({
+        name: `${data.newTenantsToday} New Tenant${data.newTenantsToday > 1 ? 's' : ''} Today`,
+        createdAt: new Date().toISOString(),
+        subscriptionStatus: 'new'
+      });
+    }
+    
+    // Add plan upgrades
+    if (data.planUpgradeCount > 0) {
+      activities.push({
+        name: `${data.planUpgradeCount} Plan Upgrade${data.planUpgradeCount > 1 ? 's' : ''}`,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        subscriptionStatus: 'upgraded'
+      });
+    }
+    
+    // Add trial users
+    if (data.trialUsers > 0) {
+      activities.push({
+        name: `${data.trialUsers} Active Trial${data.trialUsers > 1 ? 's' : ''}`,
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        subscriptionStatus: 'trial'
+      });
+    }
+    
+    // Add expired tenants reminder
+    if (data.expiredTenants > 0) {
+      activities.push({
+        name: `${data.expiredTenants} Subscription${data.expiredTenants > 1 ? 's' : ''} Expired`,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+        subscriptionStatus: 'expired'
+      });
+    }
+    
+    // If no activities from data, add some generic ones
+    if (activities.length === 0) {
+      activities.push(
+        {
+          name: "System Initialized",
+          createdAt: new Date().toISOString(),
+          subscriptionStatus: 'system'
+        },
+        {
+          name: "Welcome to Admin Dashboard",
+          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          subscriptionStatus: 'info'
+        }
+      );
+    }
+    
+    return activities.slice(0, 5); // Return max 5 activities
   };
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to logout?")) {
       localStorage.removeItem("adminToken");
       navigate("/admin/login");
+    }
+  };
+
+  const refreshData = () => {
+    loadStats();
+  };
+
+  // Get status color class
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'active':
+      case 'upgraded':
+        return 'active';
+      case 'trial':
+        return 'trial';
+      case 'expired':
+        return 'expired';
+      case 'new':
+        return 'new';
+      case 'system':
+      case 'info':
+        return 'info';
+      default:
+        return 'pending';
+    }
+  };
+
+  // Get status display text
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'active': return 'Active';
+      case 'upgraded': return 'Upgraded';
+      case 'trial': return 'Trial';
+      case 'expired': return 'Expired';
+      case 'new': return 'New';
+      case 'system': return 'System';
+      case 'info': return 'Info';
+      default: return 'Pending';
+    }
+  };
+
+  // Get activity icon
+  const getActivityIcon = (status) => {
+    switch (status) {
+      case 'active':
+      case 'upgraded': return '✅';
+      case 'trial': return '🟡';
+      case 'expired': return '⏰';
+      case 'new': return '🆕';
+      case 'system': return '⚙️';
+      case 'info': return 'ℹ️';
+      default: return '📊';
     }
   };
 
@@ -127,6 +344,13 @@ function AdminDashboard() {
             <div className="admin-header-right">
               <div className="admin-date-chip">📅 {todayLabel}</div>
               <button
+                className="admin-refresh-btn"
+                onClick={refreshData}
+                disabled={loading}
+              >
+                {loading ? "⏳" : "🔄"} {!isMobile && (loading ? 'Loading...' : 'Refresh')}
+              </button>
+              <button
                 className="admin-logout-btn"
                 type="button"
                 onClick={handleLogout}
@@ -139,6 +363,25 @@ function AdminDashboard() {
         </header>
 
         <div className="admin-content-wrapper">
+          {/* Error Banner */}
+          {hasError && (
+            <div className="admin-error-banner">
+              <div className="error-banner-content">
+                <span className="error-icon">⚠️</span>
+                <div className="error-message">
+                  <strong>Connection Issue:</strong> {errorMessage}
+                </div>
+                <button 
+                  className="error-retry-btn"
+                  onClick={refreshData}
+                  disabled={loading}
+                >
+                  {loading ? 'Retrying...' : 'Retry'}
+                </button>
+              </div>
+            </div>
+          )}
+
           {loading ? (
             <div className="admin-loader-wrapper">
               <div className="admin-loader" />
@@ -146,6 +389,14 @@ function AdminDashboard() {
             </div>
           ) : (
             <>
+              {/* Demo Data Notice */}
+              {hasError && (
+                <div className="demo-data-notice">
+                  <span className="demo-icon">📊</span>
+                  <span>Showing demo data. Real data will appear when database connection is restored.</span>
+                </div>
+              )}
+
               {/* ====== TOP SUMMARY STRIP ====== */}
               <section className="admin-section">
                 <div className="admin-summary-strip">
@@ -154,7 +405,7 @@ function AdminDashboard() {
                     <div className="admin-summary-content">
                       <div className="admin-summary-label">Total Tenants</div>
                       <div className="admin-summary-value">
-                        {stats.tenants}
+                        {stats.totalTenants}
                       </div>
                     </div>
                   </div>
@@ -181,7 +432,7 @@ function AdminDashboard() {
                     <div className="admin-summary-content">
                       <div className="admin-summary-label">Total Revenue</div>
                       <div className="admin-summary-value money">
-                        ₹{Number(stats.revenue).toLocaleString()}
+                        ₹{Number(stats.totalRevenue).toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -202,7 +453,7 @@ function AdminDashboard() {
                     <div className="admin-card-badge badge-yellow">Total</div>
                     <div className="admin-card-icon">🏢</div>
                     <div className="admin-card-label">Total Tenants</div>
-                    <div className="admin-card-value">{stats.tenants}</div>
+                    <div className="admin-card-value">{stats.totalTenants}</div>
                   </div>
 
                   <div className="nandi-admin-card">
@@ -316,7 +567,7 @@ function AdminDashboard() {
                 </div>
               </section>
 
-              {/* ====== C. Revenue & Notifications ====== */}
+              {/* ====== C. Revenue & System Stats ====== */}
               <section className="admin-section">
                 <div className="admin-two-column">
                   {/* Revenue Card */}
@@ -327,12 +578,22 @@ function AdminDashboard() {
                         <div>
                           <div className="admin-card-label">Total Revenue</div>
                           <div className="admin-card-value money-big">
-                            ₹{Number(stats.revenue).toLocaleString()}
+                            ₹{Number(stats.totalRevenue).toLocaleString()}
                           </div>
                           <p className="admin-card-hint">
                             Sum of all confirmed payments across tenants
                           </p>
                         </div>
+                      </div>
+                    </div>
+                    <div className="admin-revenue-stats">
+                      <div className="revenue-stat">
+                        <span className="stat-label">Total Invoices:</span>
+                        <span className="stat-value">{stats.totalInvoices}</span>
+                      </div>
+                      <div className="revenue-stat">
+                        <span className="stat-label">Available Plans:</span>
+                        <span className="stat-value">{stats.activePlansCount}/{stats.totalPlans}</span>
                       </div>
                     </div>
                     <Link
@@ -343,14 +604,14 @@ function AdminDashboard() {
                     </Link>
                   </div>
 
-                  {/* Email & Reminder Stats */}
+                  {/* System Activity */}
                   <div className="admin-right-column">
                     <div className="admin-section-header small">
                       <h3 className="admin-section-title-sm">
-                        📧 Email & Reminder Activity
+                        📊 System Activity
                       </h3>
                       <p className="admin-section-subtitle-sm">
-                        Auto communication handled by the system
+                        Platform performance and notifications
                       </p>
                     </div>
 
@@ -359,7 +620,7 @@ function AdminDashboard() {
                         <div className="admin-card-icon small">📨</div>
                         <div className="admin-card-content">
                           <div className="admin-card-label">
-                            Expiry Emails Sent
+                            Expiry Emails
                           </div>
                           <div className="admin-card-value">
                             {stats.expiryEmailsSent}
@@ -383,12 +644,59 @@ function AdminDashboard() {
                         <div className="admin-card-icon small">🤖</div>
                         <div className="admin-card-content">
                           <div className="admin-card-label">
-                            Auto-Cron Notifications
+                            Auto Notifications
                           </div>
                           <div className="admin-card-value">
                             {stats.autoCronNotificationsSent}
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Recent Activities */}
+                    <div className="nandi-admin-card activities-card">
+                      <div className="admin-card-header">
+                        <h4>🕒 Recent Activities</h4>
+                        <button 
+                          className="refresh-small"
+                          onClick={refreshData}
+                          disabled={loading}
+                          title="Refresh data"
+                        >
+                          {loading ? "⏳" : "🔄"}
+                        </button>
+                      </div>
+                      <div className="activities-list">
+                        {stats.recentTenants.length === 0 ? (
+                          <div className="no-activities">
+                            <div className="no-activities-icon">📊</div>
+                            <p>No recent activities</p>
+                          </div>
+                        ) : (
+                          stats.recentTenants.map((activity, index) => (
+                            <div key={index} className="activity-item">
+                              <div className="activity-icon">
+                                {getActivityIcon(activity.subscriptionStatus)}
+                              </div>
+                              <div className="activity-details">
+                                <div className="activity-title">
+                                  {activity.name}
+                                </div>
+                                <div className="activity-time">
+                                  {new Date(activity.createdAt).toLocaleDateString('en-IN', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </div>
+                              </div>
+                              <div className={`activity-status ${getStatusClass(activity.subscriptionStatus)}`}>
+                                {getStatusText(activity.subscriptionStatus)}
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </div>
                   </div>
@@ -407,19 +715,19 @@ function AdminDashboard() {
                 <div className="admin-quick-actions">
                   <Link className="admin-link-btn" to="/admin/tenants">
                     <span className="action-icon">👥</span>
-                    <span className="action-text">View Tenants</span>
+                    <span className="action-text">Manage Tenants</span>
                   </Link>
                   <Link className="admin-link-btn" to="/admin/plans">
                     <span className="action-icon">💳</span>
                     <span className="action-text">Manage Plans</span>
                   </Link>
-                  <Link className="admin-link-btn" to="/admin/revenue">
-                    <span className="action-icon">📈</span>
-                    <span className="action-text">View Revenue</span>
+                  <Link className="admin-link-btn" to="/manageadmin">
+                    <span className="action-icon">👨‍💼</span>
+                    <span className="action-text">Manage Admins</span>
                   </Link>
                   <Link className="admin-link-btn" to="/admin/settings">
                     <span className="action-icon">⚙️</span>
-                    <span className="action-text">Admin Settings</span>
+                    <span className="action-text">System Settings</span>
                   </Link>
                 </div>
               </section>

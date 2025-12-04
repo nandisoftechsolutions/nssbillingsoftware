@@ -639,10 +639,11 @@ function PurchaseInvoiceList() {
                       </td>
                       <td className="invoice-actions">
                         <div className="action-buttons">
+                          {/* UPDATED: Changed to preview page */}
                           <Link
-                            to={`/purchases/${invoice._id}`}
+                            to={`/purchase-invoice-preview/${invoice._id}`}
                             className="btn-action btn-view"
-                            title="View Details"
+                            title="View Preview"
                           >
                             👁️
                           </Link>

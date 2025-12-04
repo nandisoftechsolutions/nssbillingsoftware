@@ -1,8 +1,11 @@
 // src/pages/MainAdmin/Landing.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import "./Landing.css";
+
+// 🔹 Global API helper
+import api from "../../utils/api";
 
 // 🔹 Make sure these 3 files exist in: src/assets/
 import heroImage from "../../assets/hero.png";
@@ -12,42 +15,52 @@ import featuresImage from "../../assets/features.png";
 function Landing() {
   const SITE_URL = "https://nssbillingsoftware.vercel.app/";
 
+  // ==============================
   // SEO Configuration
+  // ==============================
   const seoConfig = {
-    title: "Nandi Billing Software – Best GST Billing Software for Small Businesses",
-    description: "Create GST invoices in 8 seconds with India's fastest billing software. Free GST billing, inventory management, stock tracking & business reports for small businesses.",
-    keywords: "GST billing software, billing software India, free GST billing app, invoice generator, inventory management, small business software, Nandi Billing, POS billing system, accounting software",
+    title:
+      "Nandi Billing Software – Best GST Billing Software for Small Businesses",
+    description:
+      "Create GST invoices in 8 seconds with India's fastest billing software. Free GST billing, inventory management, stock tracking & business reports for small businesses.",
+    keywords:
+      "GST billing software, billing software India, free GST billing app, invoice generator, inventory management, small business software, Nandi Billing, POS billing system, accounting software",
     canonical: SITE_URL,
-    ogImage: `${SITE_URL}/images/og-image.jpg`
+    ogImage: `${SITE_URL}/images/og-image.jpg`,
   };
 
   // Structured Data for SEO
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Nandi Billing Software",
-    "applicationCategory": "BusinessApplication",
-    "operatingSystem": "Web, PWA, Android, iOS",
-    "offers": {
+    name: "Nandi Billing Software",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web, PWA, Android, iOS",
+    offers: {
       "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "INR"
+      price: "0",
+      priceCurrency: "INR",
     },
-    "aggregateRating": {
+    aggregateRating: {
       "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "ratingCount": "1400",
-      "bestRating": "5"
+      ratingValue: "4.9",
+      ratingCount: "1400",
+      bestRating: "5",
     },
-    "author": {
+    author: {
       "@type": "Organization",
-      "name": "Nandi Softech Solutions",
-      "url": SITE_URL
+      name: "Nandi Softech Solutions",
+      url: SITE_URL,
     },
-    "description": "Super-fast GST billing, inventory management & business reporting software for small businesses in India."
+    description:
+      "Super-fast GST billing, inventory management & business reporting software for small businesses in India.",
   };
 
-  const dynamicData = {
+  // ==============================
+  // Static fallback data
+  // (used when API fails / not available)
+  // ==============================
+  const staticDynamicData = {
     hero: {
       title: "The Best <span>GST Billing Software</span> for Small Businesses",
       subtitle:
@@ -55,12 +68,6 @@ function Landing() {
       trustedCount: "1 Crore +",
       youtubeChannel: "https://www.youtube.com/@NandiSoftechSolutions",
     },
-    stats: [
-      { number: "10,000+", label: "Happy Customers" },
-      { number: "₹500Cr+", label: "Business Processed" },
-      { number: "50,000+", label: "Invoices Generated" },
-      { number: "99.9%", label: "Uptime Guarantee" },
-    ],
     features: [
       {
         icon: "🧾",
@@ -124,6 +131,7 @@ function Landing() {
         ],
       },
     },
+    // Fallback testimonials (used if API fails or returns 0)
     testimonials: [
       {
         name: "Rajesh Kumar",
@@ -165,13 +173,126 @@ function Landing() {
     },
     finalCta: {
       title: "Ready to Transform Your Business?",
-      description: "Join 10,000+ businesses that trust Nandi Billing for their growth.",
+      description:
+        "Join 10,000+ businesses that trust Nandi Billing for their growth.",
       note: "No credit card required • 7-day free trial • Setup in 2 minutes",
     },
   };
 
+  // ==============================
+  // 🔄 DYNAMIC STATE (Stats + Testimonials)
+  // ==============================
+
+  // Stats shown in the "10,000+" section
+  const [statsUI, setStatsUI] = useState({
+    customers: "10,000+",
+    businessValue: "₹00Cr+",
+    invoices: "50,000+",
+    uptime: "99.9%",
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Testimonials for "What Our Customers Say"
+  const [testimonials, setTestimonials] = useState(
+    staticDynamicData.testimonials
+  );
+  const [testLoading, setTestLoading] = useState(true);
+
+  // Optional flags (for debugging / future UI messages)
+  const [statsError, setStatsError] = useState("");
+  const [testError, setTestError] = useState("");
+
+  // ==============================
+  // 📡 Load platform stats (public)
+  // ==============================
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        setStatsLoading(true);
+        setStatsError("");
+
+        // NOTE:
+        // Make sure this route is PUBLIC on backend and in api.js whitelist
+        // Example backend route: GET /platform/overview
+        const res = await api.get("/platform/overview");
+
+        const data = res?.data?.data || res?.data || {};
+
+        const totalTenants =
+          data.totalTenants ?? data.tenants ?? data.tenantCount;
+        const totalInvoices =
+          data.totalInvoices ?? data.invoices ?? data.invoiceCount;
+        const totalBusinessValue =
+          data.totalBusinessValue ?? data.businessValue ?? data.turnoverCr;
+        const uptimePercent =
+          data.uptimePercent ?? data.uptime ?? data.uptimePercentage;
+
+        const formatted = {
+          customers: totalTenants
+            ? `${totalTenants.toLocaleString("en-IN")}+`
+            : "10,000+",
+          businessValue: totalBusinessValue
+            ? `₹${Number(totalBusinessValue).toLocaleString("en-IN")}Cr+`
+            : "₹00Cr+",
+          invoices: totalInvoices
+            ? `${totalInvoices.toLocaleString("en-IN")}+`
+            : "50,000+",
+          uptime: uptimePercent ? `${uptimePercent}%` : "99.9%",
+        };
+
+        setStatsUI(formatted);
+      } catch (err) {
+        console.error("Public stats load error:", err);
+        setStatsError("Failed to load live stats. Showing sample data.");
+        // keep fallback values
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    const loadTestimonials = async () => {
+      try {
+        setTestLoading(true);
+        setTestError("");
+
+        // NOTE:
+        // Backend: GET /ratings/public (no auth)
+        const res = await api.get("/ratings/public");
+
+        const list = res?.data?.data || res?.data?.reviews || [];
+
+        if (Array.isArray(list) && list.length > 0) {
+          const normalized = list.map((r) => ({
+            name: r.name || "Happy Customer",
+            business: r.business || "Business Owner",
+            text: r.message || r.text || "",
+            rating: r.rating || 5,
+          }));
+          setTestimonials(normalized);
+        } else {
+          // No reviews yet → keep fallback
+          setTestimonials(staticDynamicData.testimonials);
+        }
+      } catch (err) {
+        console.error("Public testimonials load error:", err);
+        setTestError(
+          "Failed to load live testimonials. Showing sample reviews."
+        );
+        // keep fallback testimonials
+      } finally {
+        setTestLoading(false);
+      }
+    };
+
+    loadStats();
+    loadTestimonials();
+  }, []);
+
+  // ==============================
+  // Handlers & helpers
+  // ==============================
   const handlePlayClick = () => {
-    window.open(dynamicData.hero.youtubeChannel, "_blank");
+    window.open(staticDynamicData.hero.youtubeChannel, "_blank");
   };
 
   const handleInstallClick = () => {
@@ -190,6 +311,14 @@ function Landing() {
   const getMobileAppImage = () => mobileAppImage || "";
   const getFeaturesImage = () => featuresImage || "";
 
+  // Build stats cards from current state
+  const statsCards = [
+    { number: statsUI.customers, label: "Happy Customers" },
+    { number: statsUI.businessValue, label: "Business Processed" },
+    { number: statsUI.invoices, label: "Invoices Generated" },
+    { number: statsUI.uptime, label: "Uptime Guarantee" },
+  ];
+
   return (
     <>
       {/* ========== REACT HELMET SEO ========== */}
@@ -200,10 +329,10 @@ function Landing() {
         <meta name="keywords" content={seoConfig.keywords} />
         <meta name="robots" content="index, follow" />
         <meta name="author" content="Nandi Softech Solutions" />
-        
+
         {/* === CANONICAL URL === */}
         <link rel="canonical" href={seoConfig.canonical} />
-        
+
         {/* === OPEN GRAPH TAGS === */}
         <meta property="og:title" content={seoConfig.title} />
         <meta property="og:description" content={seoConfig.description} />
@@ -212,77 +341,80 @@ function Landing() {
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Nandi Billing Software" />
         <meta property="og:locale" content="en_IN" />
-        
+
         {/* === TWITTER CARD TAGS === */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoConfig.title} />
         <meta name="twitter:description" content={seoConfig.description} />
         <meta name="twitter:image" content={seoConfig.ogImage} />
         <meta name="twitter:site" content="@nandibilling" />
-        
+
         {/* === ADDITIONAL SEO META TAGS === */}
         <meta name="language" content="English" />
         <meta name="geo.region" content="IN-KA" />
         <meta name="geo.placename" content="Bangalore, Karnataka" />
-        
+
         {/* === STRUCTURED DATA (JSON-LD) === */}
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
-        
+
         {/* === ADDITIONAL SCHEMA MARKUP === */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Nandi Softech Solutions",
-            "url": SITE_URL,
-            "logo": `${SITE_URL}/images/logo.png`,
-            "description": "Provider of India's best GST billing and inventory management software for small businesses",
-            "address": {
+            name: "Nandi Softech Solutions",
+            url: SITE_URL,
+            logo: `${SITE_URL}/images/logo.png`,
+            description:
+              "Provider of India's best GST billing and inventory management software for small businesses",
+            address: {
               "@type": "PostalAddress",
-              "addressCountry": "IN"
+              addressCountry: "IN",
             },
-            "contactPoint": {
+            contactPoint: {
               "@type": "ContactPoint",
-              "telephone": "+91-XXXXXXXXXX",
-              "contactType": "customer service"
-            }
+              telephone: "+91-XXXXXXXXXX",
+              contactType: "customer service",
+            },
           })}
         </script>
       </Helmet>
 
       {/* ========== LANDING PAGE CONTENT ========== */}
       <div className="nandi-landing">
-        
         {/* 🌟 HERO SECTION */}
         <section className="nandi-hero-section d-flex align-items-center">
           <div className="container">
             <div className="row align-items-center gy-4">
-
               {/* LEFT CONTENT - TEXT */}
               <div className="col-lg-6 text-center text-lg-start">
                 <h1
                   className="fw-bold display-5 nandi-hero-title mb-3"
-                  dangerouslySetInnerHTML={{ __html: dynamicData.hero.title }}
+                  dangerouslySetInnerHTML={{
+                    __html: staticDynamicData.hero.title,
+                  }}
                 />
                 <p
                   className="nandi-hero-sub mb-4"
-                  dangerouslySetInnerHTML={{ __html: dynamicData.hero.subtitle }}
+                  dangerouslySetInnerHTML={{
+                    __html: staticDynamicData.hero.subtitle,
+                  }}
                 />
 
                 {/* CALL TO ACTION BUTTONS */}
                 <div className="d-flex flex-wrap gap-3 mb-4 justify-content-center justify-content-lg-start">
-                  <Link 
-                    to="/register" 
+                  <Link
+                    to="/register"
                     className="btn fw-bold px-4 py-2 nandi-cta-btn"
                     title="Start Free GST Billing - No Credit Card Required"
                     aria-label="Start free GST billing with Nandi Software"
                   >
                     🚀 Start Free Billing
                   </Link>
-                  <Link 
-                    to="/contact" 
+                  <Link
+                    to="/contact"
                     className="btn fw-bold px-4 py-2 nandi-demo-btn"
                     title="Book Free Demo - See Nandi Billing in Action"
                     aria-label="Book a free demo of Nandi Billing Software"
@@ -301,7 +433,10 @@ function Landing() {
                     loading="lazy"
                   />
                   <span className="text-light">
-                    <strong>Trusted by {dynamicData.hero.trustedCount} businesses across India</strong>
+                    <strong>
+                      Trusted by {staticDynamicData.hero.trustedCount} businesses
+                      across India
+                    </strong>
                   </span>
                 </div>
               </div>
@@ -335,7 +470,6 @@ function Landing() {
                   Watch how Nandi Billing simplifies your workflow
                 </p>
               </div>
-
             </div>
           </div>
         </section>
@@ -343,11 +477,23 @@ function Landing() {
         {/* 📊 STATS SECTION */}
         <section className="nandi-stats-section">
           <div className="container">
+            {statsError && (
+              <p className="text-center text-warning small mb-2">
+                {statsError}
+              </p>
+            )}
             <div className="row g-3">
-              {dynamicData.stats.map((item, index) => (
+              {statsCards.map((item, index) => (
                 <div className="col-6 col-md-3" key={index}>
                   <div className="nandi-stat-card">
-                    <div className="nandi-stat-number">{item.number}</div>
+                    <div
+                      className={
+                        "nandi-stat-number" +
+                        (statsLoading ? " nandi-skeleton-text" : "")
+                      }
+                    >
+                      {item.number}
+                    </div>
                     <div className="nandi-stat-label">{item.label}</div>
                   </div>
                 </div>
@@ -366,14 +512,16 @@ function Landing() {
               Everything you need to run your business efficiently
             </p>
             <div className="row g-4">
-              {dynamicData.features.map((feature, index) => (
+              {staticDynamicData.features.map((feature, index) => (
                 <div className="col-md-6 col-lg-4" key={index}>
                   <div className="nandi-feature card border-0 shadow-sm h-100 hover-lift">
                     <div className="card-body p-4">
                       <div className="nandi-feature-icon mb-3">
                         {feature.icon}
                       </div>
-                      <h3 className="h5 fw-bold text-dark">{feature.title}</h3>
+                      <h3 className="h5 fw-bold text-dark">
+                        {feature.title}
+                      </h3>
                       <p className="text-muted mb-0">{feature.text}</p>
                     </div>
                   </div>
@@ -389,17 +537,19 @@ function Landing() {
             <div className="row align-items-center gy-4">
               <div className="col-lg-6">
                 <h2 className="fw-bold text-white display-6 mb-3">
-                  {dynamicData.showcase.title}
+                  {staticDynamicData.showcase.title}
                 </h2>
                 <p className="text-light mb-4 fs-5">
-                  {dynamicData.showcase.description}
+                  {staticDynamicData.showcase.description}
                 </p>
                 <div className="nandi-feature-list">
-                  {dynamicData.showcase.features.map((feature, index) => (
-                    <div key={index} className="text-light mb-2 fs-6">
-                      ✅ {feature}
-                    </div>
-                  ))}
+                  {staticDynamicData.showcase.features.map(
+                    (feature, index) => (
+                      <div key={index} className="text-light mb-2 fs-6">
+                        ✅ {feature}
+                      </div>
+                    )
+                  )}
                 </div>
                 <Link
                   to="/features"
@@ -431,9 +581,11 @@ function Landing() {
         <section className="nandi-pricing-preview">
           <div className="container text-center">
             <h2 className="fw-bold text-primary mb-3">
-              {dynamicData.pricing.title}
+              {staticDynamicData.pricing.title}
             </h2>
-            <p className="text-muted mb-5">{dynamicData.pricing.subtitle}</p>
+            <p className="text-muted mb-5">
+              {staticDynamicData.pricing.subtitle}
+            </p>
 
             <div className="row justify-content-center">
               <div className="col-md-8 col-lg-6">
@@ -441,20 +593,20 @@ function Landing() {
                   <div className="card-body p-5">
                     <div className="nandi-popular-badge">Most Popular</div>
                     <h3 className="text-primary fw-bold">
-                      {dynamicData.pricing.popularPlan.name}
+                      {staticDynamicData.pricing.popularPlan.name}
                     </h3>
                     <div className="nandi-price display-5 fw-bold text-dark mb-3">
-                      {dynamicData.pricing.popularPlan.price}
+                      {staticDynamicData.pricing.popularPlan.price}
                       <span className="fs-6 text-muted">
-                        {dynamicData.pricing.popularPlan.period}
+                        {staticDynamicData.pricing.popularPlan.period}
                       </span>
                     </div>
                     <p className="text-muted mb-4">
-                      {dynamicData.pricing.popularPlan.description}
+                      {staticDynamicData.pricing.popularPlan.description}
                     </p>
 
                     <div className="nandi-features-list text-start mb-4">
-                      {dynamicData.pricing.popularPlan.features.map(
+                      {staticDynamicData.pricing.popularPlan.features.map(
                         (feature, index) => (
                           <div
                             key={index}
@@ -494,26 +646,33 @@ function Landing() {
         {/* 🏆 TESTIMONIALS */}
         <section className="nandi-testimonials">
           <div className="container">
-            <h2 className="fw-bold text-center text-primary mb-5">
+            <h2 className="fw-bold text-center text-primary mb-2">
               What Our Customers Say
             </h2>
+            {testError && (
+              <p className="text-center text-warning small mb-3">
+                {testError}
+              </p>
+            )}
             <div className="row g-4">
-              {dynamicData.testimonials.map((testimonial, index) => (
+              {testimonials.map((testimonial, index) => (
                 <div className="col-md-4" key={index}>
                   <div className="nandi-testimonial card border-0 shadow-sm h-100">
                     <div className="card-body p-4">
                       <div className="nandi-stars mb-3">
-                        {"★".repeat(testimonial.rating)}
+                        {"★".repeat(testimonial.rating || 5)}
                       </div>
                       <p className="text-muted mb-4 fst-italic">
                         "{testimonial.text}"
                       </p>
                       <div className="d-flex align-items-center">
                         <div className="nandi-avatar bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold me-3">
-                          {testimonial.name.charAt(0)}
+                          {testimonial.name?.charAt(0) || "C"}
                         </div>
                         <div>
-                          <h4 className="h6 fw-bold mb-1">{testimonial.name}</h4>
+                          <h4 className="h6 fw-bold mb-1">
+                            {testimonial.name}
+                          </h4>
                           <small className="text-muted">
                             {testimonial.business}
                           </small>
@@ -523,6 +682,13 @@ function Landing() {
                   </div>
                 </div>
               ))}
+              {testLoading && (
+                <div className="col-12 text-center mt-2">
+                  <span className="small text-muted">
+                    Loading real customer reviews...
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -533,26 +699,30 @@ function Landing() {
             <div className="row align-items-center gy-4">
               <div className="col-lg-6 text-center text-lg-start">
                 <h2 className="fw-bold display-6 mb-4">
-                  {dynamicData.mobileApp.title}
+                  {staticDynamicData.mobileApp.title}
                 </h2>
-                <p className="mb-4 fs-5">{dynamicData.mobileApp.description}</p>
+                <p className="mb-4 fs-5">
+                  {staticDynamicData.mobileApp.description}
+                </p>
 
                 <div className="nandi-app-features mb-4">
                   <h3 className="h5 fw-bold mb-3">🌟 PWA Benefits:</h3>
-                  {dynamicData.mobileApp.features.map((feature, index) => (
-                    <div
-                      key={index}
-                      className="d-flex align-items-center mb-2"
-                    >
-                      <span className="text-warning me-3">✓</span>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
+                  {staticDynamicData.mobileApp.features.map(
+                    (feature, index) => (
+                      <div
+                        key={index}
+                        className="d-flex align-items-center mb-2"
+                      >
+                        <span className="text-warning me-3">✓</span>
+                        <span>{feature}</span>
+                      </div>
+                    )
+                  )}
                 </div>
 
                 <div className="nandi-installation-steps mb-4">
                   <h3 className="h5 fw-bold mb-3">📥 Easy Installation:</h3>
-                  {dynamicData.mobileApp.installationSteps.map(
+                  {staticDynamicData.mobileApp.installationSteps.map(
                     (step, index) => (
                       <div
                         key={index}
@@ -623,7 +793,9 @@ function Landing() {
                     }}
                   />
                   <div className="nandi-pwa-badge position-absolute top-0 start-0 m-3">
-                    <span className="badge bg-success fs-6 p-2">PWA READY</span>
+                    <span className="badge bg-success fs-6 p-2">
+                      PWA READY
+                    </span>
                   </div>
                 </div>
               </div>
@@ -635,9 +807,11 @@ function Landing() {
         <section className="nandi-final-cta text-white">
           <div className="container text-center">
             <h2 className="fw-bold display-5 mb-3">
-              {dynamicData.finalCta.title}
+              {staticDynamicData.finalCta.title}
             </h2>
-            <p className="mb-4 fs-5">{dynamicData.finalCta.description}</p>
+            <p className="mb-4 fs-5">
+              {staticDynamicData.finalCta.description}
+            </p>
             <div className="d-flex flex-wrap justify-content-center gap-3">
               <Link
                 to="/register"
@@ -654,7 +828,9 @@ function Landing() {
                 📅 Book Demo
               </Link>
             </div>
-            <p className="mt-3 small opacity-75">{dynamicData.finalCta.note}</p>
+            <p className="mt-3 small opacity-75">
+              {staticDynamicData.finalCta.note}
+            </p>
           </div>
         </section>
       </div>

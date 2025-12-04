@@ -1,43 +1,63 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import api from "../../utils/api";
 import "./Inventory.css";
+import {
+  FiPackage,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiShoppingCart,
+  FiAlertTriangle,
+  FiDownload,
+  FiUpload,
+  FiSearch,
+  FiPlus,
+  FiFilter,
+  FiDollarSign,
+  FiBarChart2,
+  FiGrid,
+  FiShoppingBag,
+  FiArchive,
+  FiPercent,
+  FiEye,
+  FiEdit,
+  FiTrash2,
+  FiMenu,
+  FiX,
+  FiRefreshCw,
+  FiChevronRight
+} from "react-icons/fi";
 
 function Inventory() {
+
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [companyId, setCompanyId] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [bulkAction, setBulkAction] = useState("");
+
+  // 🔥 DO NOT SET true by default — prevents hydration overlay flash
+  const [loading, setLoading] = useState(false);
+
   const [reports, setReports] = useState({
     lowStock: [],
     topProducts: [],
     gstSummary: {},
     stockStats: {}
   });
-  const [loading, setLoading] = useState(false);
-  const [stockUpdate, setStockUpdate] = useState({});
-  const [activeTab, setActiveTab] = useState("products");
-  const navigate = useNavigate();
 
-  // ------------------------
-  // SIDEBAR RESPONSIVE STATE
-  // ------------------------
+  const [stockFilter, setStockFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [viewMode, setViewMode] = useState("grid");
+
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Responsive Sidebar
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      const mobile = width < 768;
-      setIsMobile(mobile);
-
-      if (width >= 992) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
+      setIsMobile(width < 768);
+      setSidebarOpen(width >= 992);
     };
 
     handleResize();
@@ -45,78 +65,131 @@ function Inventory() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
   const closeSidebar = () => setSidebarOpen(false);
 
-  const gstRates = [
-    { value: 0, label: "0% - Nil Rated" },
-    { value: 0.1, label: "0.1% - Special Rate" },
-    { value: 0.25, label: "0.25% - Special Rate" },
-    { value: 3, label: "3% - GST" },
-    { value: 5, label: "5% - GST" },
-    { value: 12, label: "12% - GST" },
-    { value: 18, label: "18% - GST" },
-    { value: 28, label: "28% - GST" }
-  ];
-
+  // Initial Load
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const userData = JSON.parse(localStorage.getItem("user") || "{}");
     if (!token) {
       alert("Please log in first.");
       window.location.href = "/login";
       return;
     }
+
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    setCompanyId(userData.companyId || "");
-    load();
+    loadProducts();
   }, []);
 
-  const load = async () => {
+  // Apply Filters & Sorting
+  useEffect(() => {
+    if (!products.length) {
+      setFilteredProducts([]);
+      return;
+    }
+
+    let filtered = [...products];
+
+    if (search.trim()) {
+      filtered = filtered.filter(p =>
+        p.name?.toLowerCase().includes(search.toLowerCase()) ||
+        p.hsn?.toString().includes(search)
+      );
+    }
+
+    switch (stockFilter) {
+      case "low":
+        filtered = filtered.filter(p => p.availableStock <= 10 && p.availableStock > 0);
+        break;
+      case "out":
+        filtered = filtered.filter(p => p.availableStock === 0);
+        break;
+      case "in":
+        filtered = filtered.filter(p => p.availableStock > 10);
+        break;
+      default:
+        break;
+    }
+
+    switch (sortBy) {
+      case "name":
+        filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        break;
+      case "stock":
+        filtered.sort((a, b) => (b.availableStock || 0) - (a.availableStock || 0));
+        break;
+      case "value":
+        filtered.sort(
+          (a, b) =>
+            ((b.price || 0) * (b.availableStock || 0)) -
+            ((a.price || 0) * (a.availableStock || 0))
+        );
+        break;
+      default:
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  }, [products, search, stockFilter, sortBy]);
+
+  // Load Products from API
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const { data } = await api.get("/products");
-      setProducts(data.data || []);
-      loadReports(data.data || []);
+      const list = data.data || [];
+      setProducts(list);
+      loadDashboardReports(list);
     } catch (err) {
-      console.error("Error loading products:", err);
-      alert("Error loading products: " + (err.response?.data?.message || err.message));
+      console.error("Product load error:", err);
+      alert("Failed to load inventory");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadReports = (productsData = products) => {
+  // Inventory Analytics
+  const loadDashboardReports = useCallback((productsData) => {
     try {
-      const lowStock = productsData.filter(p => p.availableStock <= 10).slice(0, 5);
+      const lowStock = productsData
+        .filter(p => (p.availableStock || 0) <= 10 && (p.availableStock || 0) > 0)
+        .slice(0, 10);
+
       const topProducts = [...productsData]
-        .sort((a, b) => (b.price * b.availableStock) - (a.price * a.availableStock))
-        .slice(0, 5);
-      
+        .sort(
+          (a, b) =>
+            ((b.price || 0) * (b.availableStock || 0)) -
+            ((a.price || 0) * (a.availableStock || 0))
+        )
+        .slice(0, 10);
+
       const gstSummary = {
-        totalCGST: productsData.reduce((sum, p) => {
-          const calculated = calculateProductValues(p);
-          return sum + calculated.cgst;
-        }, 0),
-        totalSGST: productsData.reduce((sum, p) => {
-          const calculated = calculateProductValues(p);
-          return sum + calculated.sgst;
-        }, 0),
-        totalIGST: productsData.reduce((sum, p) => {
-          const calculated = calculateProductValues(p);
-          return sum + calculated.igst;
-        }, 0),
+        totalCGST: productsData.reduce((sum, p) => sum + getGstSplit(p).cgst, 0),
+        totalSGST: productsData.reduce((sum, p) => sum + getGstSplit(p).sgst, 0),
+        totalIGST: productsData.reduce((sum, p) => sum + getGstSplit(p).igst, 0),
       };
 
       const stockStats = {
-        totalStock: productsData.reduce((sum, p) => sum + (parseInt(p.currentStock) || 0), 0),
-        availableStock: productsData.reduce((sum, p) => sum + (parseInt(p.availableStock) || 0), 0),
-        calculatedSoldStock: productsData.reduce((sum, p) => sum + ((parseInt(p.currentStock) || 0) - (parseInt(p.availableStock) || 0)), 0),
-        reservedStock: productsData.reduce((sum, p) => sum + ((parseInt(p.currentStock) || 0) - (parseInt(p.availableStock) || 0)), 0),
-        outOfStock: productsData.filter(p => p.availableStock === 0).length,
-        lowStock: productsData.filter(p => p.availableStock > 0 && p.availableStock <= 10).length,
-        inStock: productsData.filter(p => p.availableStock > 10).length,
-        totalProducts: productsData.length
+        totalProducts: productsData.length,
+        totalStock: productsData.reduce(
+          (sum, p) => sum + (parseInt(p.currentStock) || 0),
+          0
+        ),
+        availableStock: productsData.reduce(
+          (sum, p) => sum + (parseInt(p.availableStock) || 0),
+          0
+        ),
+        outOfStock: productsData.filter(p => (p.availableStock || 0) === 0).length,
+        lowStock: productsData.filter(
+          p => (p.availableStock || 0) > 0 && (p.availableStock || 0) <= 10
+        ).length,
+        inStock: productsData.filter(
+          p => (p.availableStock || 0) > 10
+        ).length,
+        soldStock: productsData.reduce(
+          (sum, p) => sum + ((p.currentStock || 0) - (p.availableStock || 0)),
+          0
+        ),
       };
 
       setReports({
@@ -125,17 +198,41 @@ function Inventory() {
         gstSummary,
         stockStats
       });
-    } catch (err) {
-      console.error("Error loading reports:", err);
-    }
-  };
 
+    } catch (err) {
+      console.error("Dashboard report error:", err);
+    }
+  }, []);
+
+  // GST Calculator
+  const getGstSplit = useCallback((product) => {
+    const price = parseFloat(product.price) || 0;
+    const qty = parseInt(product.availableStock) || 0;
+    const gstRate = parseFloat(product.gstRate) || 0;
+
+    const amount = price * qty;
+    const gstAmount = (amount * gstRate) / 100;
+
+    let cgst = gstAmount / 2;
+    let sgst = gstAmount / 2;
+    let igst = 0;
+
+    if (product.isInterState) {
+      igst = gstAmount;
+      cgst = 0;
+      sgst = 0;
+    }
+
+    return { cgst, sgst, igst };
+  }, []);
+
+  // Upload CSV
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-      alert("Please upload a CSV file");
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      alert("Only CSV file allowed.");
       return;
     }
 
@@ -147,889 +244,752 @@ function Inventory() {
       const { data } = await api.post("/products/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert(data.message || "Products uploaded successfully");
-      load();
+
+      alert(data.message || "Uploaded successfully!");
+      loadProducts();
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload CSV.");
+    } finally {
       e.target.value = "";
-    } catch (err) {
-      alert("Error uploading products: " + (err.response?.data?.message || err.message));
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+  // Export CSV
+  const exportCSV = () => {
+    if (!products.length) return alert("No products to export.");
+
+    const headers = ["Product", "HSN", "Rate", "Stock", "Available", "GST", "Value"];
+
+    const rows = products.map(p => [
+      p.name || "",
+      p.hsn || "",
+      p.price || 0,
+      p.currentStock || 0,
+      p.availableStock || 0,
+      p.gstRate || 0,
+      ((p.price || 0) * (p.availableStock || 0)).toFixed(2),
+    ]);
+
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `inventory_${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Delete Product
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
+
     try {
-      setLoading(true);
       await api.delete(`/products/${id}`);
-      alert("🗑️ Product deleted successfully");
-      load();
+      alert("Product deleted successfully.");
+      loadProducts();
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error("Delete error:", err);
       alert("Failed to delete product.");
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleBulkAction = async () => {
-    if (!bulkAction) {
-      alert("Please select a bulk action");
-      return;
-    }
+  const formatCurrency = useCallback((value) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value || 0);
+  }, []);
 
-    if (selectedProducts.length === 0) {
-      alert("Please select products to perform bulk action");
-      return;
-    }
-
-    if (bulkAction === "delete") {
-      if (!window.confirm(`Are you sure you want to delete ${selectedProducts.length} products?`)) return;
-      
-      try {
-        setLoading(true);
-        await Promise.all(selectedProducts.map(id => api.delete(`/products/${id}`)));
-        alert(`✅ ${selectedProducts.length} products deleted successfully`);
-        setSelectedProducts([]);
-        setBulkAction("");
-        load();
-      } catch (err) {
-        alert("Failed to delete some products");
-      } finally {
-        setLoading(false);
-      }
-    } else if (bulkAction === "export") {
-      exportSelectedToCSV(selectedProducts);
-    }
-  };
-
-  const handleProductSelect = (id) => {
-    setSelectedProducts(prev => 
-      prev.includes(id) 
-        ? prev.filter(productId => productId !== id)
-        : [...prev, id]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedProducts.length === filtered.length && filtered.length > 0) {
-      setSelectedProducts([]);
-    } else {
-      setSelectedProducts(filtered.map(p => p._id));
-    }
-  };
-
-  const handleStockUpdateChange = (productId, field, value) => {
-    setStockUpdate(prev => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        [field]: value
-      }
-    }));
-  };
-
-  const updateAvailableStock = async (productId) => {
-    const updateData = stockUpdate[productId];
-    if (!updateData || updateData.availableStock === undefined) {
-      alert("Please enter a valid stock quantity");
-      return;
-    }
-
-    const availableStock = parseInt(updateData.availableStock);
-    if (isNaN(availableStock) || availableStock < 0) {
-      alert("Please enter a valid positive number for stock");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await api.put(`/products/${productId}`, {
-        availableStock: availableStock
-      });
-      alert("✅ Available stock updated successfully");
-      setStockUpdate(prev => {
-        const newState = { ...prev };
-        delete newState[productId];
-        return newState;
-      });
-      load();
-    } catch (err) {
-      console.error("Stock update failed:", err);
-      alert("Failed to update stock: " + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateCurrentStock = async (productId) => {
-    const updateData = stockUpdate[productId];
-    if (!updateData || updateData.currentStock === undefined) {
-      alert("Please enter a valid stock quantity");
-      return;
-    }
-
-    const currentStock = parseInt(updateData.currentStock);
-    if (isNaN(currentStock) || currentStock < 0) {
-      alert("Please enter a valid positive number for stock");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await api.put(`/products/${productId}`, {
-        currentStock: currentStock
-      });
-      alert("✅ Total stock updated successfully");
-      setStockUpdate(prev => {
-        const newState = { ...prev };
-        delete newState[productId];
-        return newState;
-      });
-      load();
-    } catch (err) {
-      console.error("Stock update failed:", err);
-      alert("Failed to update stock: " + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const quickStockAdjustment = async (productId, type) => {
-    const product = products.find(p => p._id === productId);
-    if (!product) return;
-
-    let newAvailableStock = product.availableStock;
-    let newCurrentStock = product.currentStock;
-
-    if (type === 'increase') {
-      newAvailableStock += 1;
-      newCurrentStock += 1;
-    } else if (type === 'decrease') {
-      if (product.availableStock <= 0) {
-        alert("Cannot decrease stock below 0");
-        return;
-      }
-      newAvailableStock -= 1;
-      newCurrentStock -= 1;
-    }
-
-    try {
-      setLoading(true);
-      await api.put(`/products/${productId}`, {
-        availableStock: newAvailableStock,
-        currentStock: newCurrentStock
-      });
-      alert("✅ Stock adjusted successfully");
-      load();
-    } catch (err) {
-      console.error("Stock adjustment failed:", err);
-      alert("Failed to adjust stock: " + (err.response?.data?.message || err.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  };
-
-  const formatNumber = (number) => {
-    return new Intl.NumberFormat('en-IN').format(number);
-  };
-
-  const calculateProductValues = (product) => {
-    const price = parseFloat(product.price) || 0;
-    const availableStock = parseInt(product.availableStock) || 0;
-    const gstRate = parseFloat(product.gstRate) || 0;
-    const gstAmount = parseFloat(product.gstAmount) || 0;
-    
-    const amount = price * availableStock;
-    let totalGst = 0;
-    let cgst = 0;
-    let sgst = 0;
-    let igst = 0;
-
-    if (product.gstType === "percentage") {
-      totalGst = (amount * gstRate) / 100;
-      
-      if (product.isInterState) {
-        igst = totalGst;
-      } else {
-        cgst = totalGst / 2;
-        sgst = totalGst / 2;
-      }
-    } else {
-      totalGst = gstAmount * availableStock;
-      
-      if (product.isInterState) {
-        igst = totalGst;
-      } else {
-        cgst = totalGst / 2;
-        sgst = totalGst / 2;
-      }
-    }
-
-    const totalAmount = amount + totalGst;
-
-    return {
-      amount: parseFloat(amount.toFixed(2)),
-      cgst: parseFloat(cgst.toFixed(2)),
-      sgst: parseFloat(sgst.toFixed(2)),
-      igst: parseFloat(igst.toFixed(2)),
-      totalGst: parseFloat(totalGst.toFixed(2)),
-      totalAmount: parseFloat(totalAmount.toFixed(2))
-    };
-  };
-
-  const calculateSoldStock = (product) => {
-    return (parseInt(product.currentStock) || 0) - (parseInt(product.availableStock) || 0);
-  };
-
-  const filtered = products.filter((p) =>
-    (p.name || "").toLowerCase().includes(search.toLowerCase()) ||
-    (p.hsn || "").toLowerCase().includes(search.toLowerCase())
-  );
-
-  const exportToCSV = () => {
-    const headers = ["Product", "HSN", "Unit", "Rate", "GST Type", "GST Value", "Total Stock", "Available Stock", "Calculated Sold Stock", "Amount", "CGST", "SGST", "IGST", "Total GST", "Total Amount"];
-    const csvData = filtered.map(p => {
-      const calculated = calculateProductValues(p);
-      const calculatedSold = calculateSoldStock(p);
-      return [
-        p.name,
-        p.hsn,
-        p.unit,
-        p.price,
-        p.gstType,
-        p.gstType === "percentage" ? `${p.gstRate}%` : p.gstAmount,
-        p.currentStock,
-        p.availableStock,
-        calculatedSold,
-        calculated.amount,
-        calculated.cgst,
-        calculated.sgst,
-        calculated.igst,
-        calculated.totalGst,
-        calculated.totalAmount
-      ];
-    });
-
-    const csvContent = [headers, ...csvData]
-      .map(row => row.map(cell => `"${cell}"`).join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `products-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const exportSelectedToCSV = (selectedIds) => {
-    const selectedProductsData = products.filter(p => selectedIds.includes(p._id));
-    const headers = ["Product", "HSN", "Unit", "Rate", "GST Type", "GST Value", "Total Stock", "Available Stock", "Calculated Sold Stock", "Amount", "CGST", "SGST", "IGST", "Total GST", "Total Amount"];
-    const csvData = selectedProductsData.map(p => {
-      const calculated = calculateProductValues(p);
-      const calculatedSold = calculateSoldStock(p);
-      return [
-        p.name,
-        p.hsn,
-        p.unit,
-        p.price,
-        p.gstType,
-        p.gstType === "percentage" ? `${p.gstRate}%` : p.gstAmount,
-        p.currentStock,
-        p.availableStock,
-        calculatedSold,
-        calculated.amount,
-        calculated.cgst,
-        calculated.sgst,
-        calculated.igst,
-        calculated.totalGst,
-        calculated.totalAmount
-      ];
-    });
-
-    const csvContent = [headers, ...csvData]
-      .map(row => row.map(cell => `"${cell}"`).join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `selected-products-${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
+  const getStockStatus = useCallback((stock) => {
+    if (stock === 0) return { text: "Out of Stock", class: "stock-out" };
+    if (stock <= 10) return { text: "Low Stock", class: "stock-low" };
+    return { text: "In Stock", class: "stock-in" };
+  }, []);
   return (
-    <div className={`inventory-container ${sidebarOpen ? "sidebar-open" : ""}`}>
-      {/* OVERLAY FOR MOBILE */}
+    <div className="corporate-inventory-container">
+
+      {/* 🔥 Overlay only if loading === true */}
+      {loading === true && (
+        <div className="corporate-loading-overlay" style={{ display: "flex" }}>
+          <div className="corporate-loading-spinner"></div>
+          <p>Loading inventory data...</p>
+        </div>
+      )}
+
+      {/* Sidebar Overlay */}
       <div
-        className={`inventory-sidebar-overlay ${sidebarOpen ? "inventory-sidebar-overlay-visible" : ""}`}
+        className={`corporate-sidebar-overlay ${sidebarOpen ? "visible" : ""}`}
         onClick={closeSidebar}
       />
 
-      {/* SIDEBAR DRAWER */}
-      <div className={`inventory-sidebar-drawer ${sidebarOpen ? "inventory-sidebar-drawer-open" : ""}`}>
+      {/* Sidebar */}
+      <aside className={`corporate-sidebar ${sidebarOpen ? "active" : ""}`}>
         <Sidebar />
-      </div>
+      </aside>
 
-      {/* MAIN PAGE CONTENT */}
-      <div className="inventory-main-content">
-        {/* MOBILE TOPBAR */}
-        <div className="inventory-topbar">
-          <button className="inventory-sidebar-toggle-btn" onClick={toggleSidebar}>
-            ☰
+      {/* Main */}
+      <main className="corporate-inventory-main">
+
+        {/* Mobile Header */}
+        <header className="corporate-mobile-header">
+          <button className="corporate-mobile-menu-btn" onClick={toggleSidebar}>
+            {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
-        </div>
 
-        {/* Header Section */}
-        <div className="inventory-header">
-          <div className="inventory-header-content">
-            <div className="inventory-header-text">
-              <h1 className="inventory-page-title">Inventory Management</h1>
-              <p className="inventory-page-subtitle">Manage your products, stock levels, and inventory reports</p>
+          <div className="corporate-mobile-title">
+            <FiPackage size={20} />
+            <span>Inventory</span>
+          </div>
+
+          <div className="corporate-mobile-actions">
+            <button className="corporate-refresh-btn" onClick={loadProducts} disabled={loading}>
+              <FiRefreshCw size={18} />
+            </button>
+          </div>
+        </header>
+
+        {/* Desktop Header */}
+        <header className="corporate-inventory-header">
+          <div className="corporate-header-content">
+
+            <div className="corporate-header-left">
+              <h1 className="corporate-header-title">
+                <FiPackage className="corporate-header-icon" />
+                Inventory Management
+              </h1>
+              <p className="corporate-header-subtitle">
+                Real-time stock insights and inventory analytics
+              </p>
             </div>
-            <div className="inventory-header-actions">
-              <Link to="/add-product" className="inventory-btn inventory-btn-primary">
-                <span className="inventory-btn-icon">📥</span>
-                Create Purchase
-              </Link>
-              <button 
-                className="inventory-btn inventory-btn-secondary" 
-                onClick={exportToCSV} 
+
+            <div className="corporate-header-right">
+              <button
+                className="corporate-header-btn corporate-btn-secondary"
+                onClick={loadProducts}
                 disabled={loading}
               >
-                <span className="inventory-btn-icon">📥</span>
-                Export CSV
+                <FiRefreshCw size={16} />
+                Refresh
               </button>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Loading Overlay */}
-        {loading && (
-          <div className="inventory-loading">
-            <div className="inventory-spinner"></div>
-            <p>Processing...</p>
+        {/* Content */}
+        <div className="corporate-inventory-content">
+
+          {/* Top Action Bar */}
+          <div className="corporate-action-bar">
+            <div className="corporate-action-group">
+              <Link to="/create-purchase-invoice" className="corporate-btn corporate-btn-primary">
+                <FiPlus size={16} />
+                Create Purchase
+              </Link>
+
+              <label className="corporate-file-upload">
+                <input type="file" accept=".csv" onChange={handleFileUpload} disabled={loading} />
+                <FiUpload size={16} />
+                Upload CSV
+              </label>
+
+              <button
+                className="corporate-btn corporate-btn-success"
+                onClick={exportCSV}
+                disabled={loading || products.length === 0}
+              >
+                <FiDownload size={16} />
+                Export CSV
+              </button>
+
+              <Link to="/add-product" className="corporate-btn corporate-btn-info">
+                <FiPlus size={16} />
+                Add Product
+              </Link>
+            </div>
           </div>
-        )}
 
-        {/* Navigation Tabs */}
-        <div className="inventory-tabs">
-          <button 
-            className={`inventory-tab ${activeTab === "products" ? "inventory-tab-active" : ""}`}
-            onClick={() => setActiveTab("products")}
-          >
-            📦 Products
-          </button>
-          <button 
-            className={`inventory-tab ${activeTab === "reports" ? "inventory-tab-active" : ""}`}
-            onClick={() => setActiveTab("reports")}
-          >
-            📊 Reports
-          </button>
-        </div>
+          {/* Search & Filters */}
+          <div className="corporate-filter-bar">
 
-        {/* Summary Cards */}
-        {activeTab === "products" && (
-          <>
-            <div className="inventory-summary-grid">
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-primary">
-                  <span>📦</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">{reports.stockStats.totalProducts || products.length}</h3>
-                  <p className="inventory-summary-label">Total Products</p>
-                </div>
+            <div className="corporate-search-box">
+              <FiSearch className="corporate-search-icon" />
+              <input
+                type="text"
+                className="corporate-search-input"
+                placeholder="Search products by name or HSN code..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+
+            <div className="corporate-filter-group">
+
+              <div className="corporate-filter-select">
+                <FiFilter size={16} />
+                <select
+                  value={stockFilter}
+                  onChange={(e) => setStockFilter(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="all">All Stock</option>
+                  <option value="in">In Stock</option>
+                  <option value="low">Low Stock</option>
+                  <option value="out">Out of Stock</option>
+                </select>
               </div>
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-success">
-                  <span>💰</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">
-                    ₹{formatCurrency(products.reduce((sum, p) => {
-                      const calculated = calculateProductValues(p);
-                      return sum + calculated.amount;
-                    }, 0))}
-                  </h3>
-                  <p className="inventory-summary-label">Stock Value</p>
-                </div>
+
+              <div className="corporate-filter-select">
+                <FiTrendingUp size={16} />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  disabled={loading}
+                >
+                  <option value="name">Sort by Name</option>
+                  <option value="stock">Sort by Stock</option>
+                  <option value="value">Sort by Value</option>
+                </select>
               </div>
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-warning">
-                  <span>📊</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">
-                    {formatNumber(reports.stockStats.totalStock || 0)}
-                  </h3>
-                  <p className="inventory-summary-label">Total Stock</p>
-                </div>
+
+              {/* View Mode */}
+              <div className="corporate-view-toggle">
+
+                <button
+                  className={`corporate-view-btn ${viewMode === "grid" ? "active" : ""}`}
+                  onClick={() => setViewMode("grid")}
+                  disabled={loading}
+                >
+                  <FiGrid size={18} />
+                </button>
+
+                <button
+                  className={`corporate-view-btn ${viewMode === "list" ? "active" : ""}`}
+                  onClick={() => setViewMode("list")}
+                  disabled={loading}
+                >
+                  <FiArchive size={18} />
+                </button>
+
               </div>
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-info">
-                  <span>✅</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">
-                    {formatNumber(reports.stockStats.availableStock || 0)}
-                  </h3>
-                  <p className="inventory-summary-label">Available Stock</p>
-                </div>
+            </div>
+          </div>
+
+          {/* Metrics */}
+          <div className="corporate-metrics-grid">
+
+            <div className="corporate-metric-card corporate-metric-primary">
+              <div className="corporate-metric-icon">
+                <FiPackage size={24} />
               </div>
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-danger">
-                  <span>⚠️</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">
-                    {reports.stockStats.lowStock || 0}
-                  </h3>
-                  <p className="inventory-summary-label">Low Stock Items</p>
-                </div>
-              </div>
-              <div className="inventory-summary-card">
-                <div className="inventory-summary-icon inventory-summary-icon-secondary">
-                  <span>🧾</span>
-                </div>
-                <div className="inventory-summary-content">
-                  <h3 className="inventory-summary-value">
-                    ₹{formatCurrency(products.reduce((sum, p) => {
-                      const calculated = calculateProductValues(p);
-                      return sum + calculated.totalGst;
-                    }, 0))}
-                  </h3>
-                  <p className="inventory-summary-label">Total GST</p>
-                </div>
+              <div className="corporate-metric-content">
+                <h3 className="corporate-metric-value">{reports.stockStats.totalProducts || 0}</h3>
+                <p className="corporate-metric-label">Total Products</p>
               </div>
             </div>
 
-            {/* Tools Section */}
-            <div className="inventory-tools-section">
-              <div className="inventory-tool-card">
-                <h3 className="inventory-tool-title">Upload Products</h3>
-                <p className="inventory-tool-description">Bulk upload products using CSV file</p>
-                <div className="inventory-file-upload-area">
-                  <input 
-                    type="file" 
-                    accept=".csv" 
-                    onChange={handleFileUpload} 
-                    className="inventory-file-input"
-                    id="inventory-file-upload"
-                    disabled={loading}
-                  />
-                  <label htmlFor="inventory-file-upload" className="inventory-file-upload-label">
-                    <span className="inventory-upload-icon">📤</span>
-                    <span>{loading ? "Uploading..." : "Choose CSV File"}</span>
-                  </label>
-                </div>
+            <div className="corporate-metric-card corporate-metric-success">
+              <div className="corporate-metric-icon">
+                <FiShoppingBag size={24} />
               </div>
-              <div className="inventory-tool-card">
-                <h3 className="inventory-tool-title">Search Products</h3>
-                <p className="inventory-tool-description">Find products by name or HSN code</p>
-                <div className="inventory-search-container">
-                  <span className="inventory-search-icon">🔍</span>
-                  <input
-                    className="inventory-search-input"
-                    placeholder="Search products..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
+              <div className="corporate-metric-content">
+                <h3 className="corporate-metric-value">{reports.stockStats.availableStock || 0}</h3>
+                <p className="corporate-metric-label">Available Stock</p>
               </div>
             </div>
 
-            {/* Bulk Actions */}
-            {selectedProducts.length > 0 && (
-              <div className="inventory-bulk-actions">
-                <div className="inventory-bulk-actions-content">
-                  <span className="inventory-selected-count">
-                    {selectedProducts.length} product{selectedProducts.length !== 1 ? 's' : ''} selected
-                  </span>
-                  <div className="inventory-bulk-actions-controls">
-                    <select 
-                      className="inventory-bulk-action-select"
-                      value={bulkAction}
-                      onChange={(e) => setBulkAction(e.target.value)}
-                      disabled={loading}
-                    >
-                      <option value="">Select Action</option>
-                      <option value="delete">Delete Selected</option>
-                      <option value="export">Export Selected</option>
-                    </select>
-                    <button 
-                      className="inventory-btn inventory-btn-danger"
-                      onClick={handleBulkAction}
-                      disabled={loading || !bulkAction}
-                    >
-                      Apply Action
-                    </button>
-                    <button 
-                      className="inventory-btn inventory-btn-outline"
-                      onClick={() => setSelectedProducts([])}
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
+            <div className="corporate-metric-card corporate-metric-warning">
+              <div className="corporate-metric-icon">
+                <FiAlertTriangle size={24} />
               </div>
-            )}
-
-            {/* Products Table */}
-            <div className="inventory-table-card">
-              <div className="inventory-table-header">
-                <div className="inventory-table-title-section">
-                  <h2 className="inventory-table-title">Products</h2>
-                  <p className="inventory-table-subtitle">
-                    Showing {filtered.length} of {products.length} products
-                  </p>
-                </div>
-                <div className="inventory-table-actions">
-                  <button 
-                    className="inventory-btn inventory-btn-icon"
-                    onClick={load}
-                    title="Refresh"
-                    disabled={loading}
-                  >
-                    <span className="inventory-btn-icon">🔄</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="inventory-table-container">
-                <table className="inventory-data-table">
-                  <thead>
-                    <tr>
-                      <th className="inventory-checkbox-cell">
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.length === filtered.length && filtered.length > 0}
-                          onChange={handleSelectAll}
-                          disabled={loading || filtered.length === 0}
-                        />
-                      </th>
-                      <th>Product</th>
-                      <th>HSN</th>
-                      <th>Rate</th>
-                      <th>GST</th>
-                      <th>Total Stock</th>
-                      <th>Available</th>
-                      <th>Sold</th>
-                      <th>Value</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((p, i) => {
-                      const calculated = calculateProductValues(p);
-                      const calculatedSold = calculateSoldStock(p);
-                      const currentStockUpdate = stockUpdate[p._id] || {};
-                      const isLowStock = p.availableStock <= 10;
-                      const isOutOfStock = p.availableStock === 0;
-                      
-                      return (
-                        <tr key={p._id} className={isOutOfStock ? 'inventory-out-of-stock' : isLowStock ? 'inventory-low-stock' : ''}>
-                          <td className="inventory-checkbox-cell">
-                            <input
-                              type="checkbox"
-                              checked={selectedProducts.includes(p._id)}
-                              onChange={() => handleProductSelect(p._id)}
-                              disabled={loading}
-                            />
-                          </td>
-                          <td>
-                            <div className="inventory-product-info">
-                              <div className="inventory-product-name">{p.name}</div>
-                              <div className="inventory-product-meta">{p.unit}</div>
-                            </div>
-                          </td>
-                          <td className="inventory-hsn-code">{p.hsn}</td>
-                          <td className="inventory-price">₹{formatCurrency(p.price || 0)}</td>
-                          <td>
-                            <div className="inventory-gst-info">
-                              <span className="inventory-gst-type">{p.gstType}</span>
-                              <span className="inventory-gst-value">
-                                {p.gstType === "percentage" ? `${p.gstRate}%` : `₹${formatCurrency(p.gstAmount || 0)}`}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="inventory-stock-cell">
-                            <div className="inventory-stock-section">
-                              <span className="inventory-stock-value">{p.currentStock}</span>
-                              <div className="inventory-stock-update">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  placeholder="Update"
-                                  value={currentStockUpdate.currentStock || ""}
-                                  onChange={(e) => handleStockUpdateChange(p._id, 'currentStock', e.target.value)}
-                                  disabled={loading}
-                                  className="inventory-stock-input"
-                                />
-                                <button
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm"
-                                  onClick={() => updateCurrentStock(p._id)}
-                                  disabled={loading || !currentStockUpdate.currentStock}
-                                >
-                                  💾
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="inventory-stock-cell">
-                            <div className="inventory-stock-section">
-                              <span className={`inventory-stock-value ${isLowStock ? 'inventory-low' : ''} ${isOutOfStock ? 'inventory-out' : ''}`}>
-                                {p.availableStock}
-                                {isLowStock && !isOutOfStock && " ⚠️"}
-                                {isOutOfStock && " ❌"}
-                              </span>
-                              <div className="inventory-stock-update">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  placeholder="Update"
-                                  value={currentStockUpdate.availableStock || ""}
-                                  onChange={(e) => handleStockUpdateChange(p._id, 'availableStock', e.target.value)}
-                                  disabled={loading}
-                                  className="inventory-stock-input"
-                                />
-                                <button
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm"
-                                  onClick={() => updateAvailableStock(p._id)}
-                                  disabled={loading || !currentStockUpdate.availableStock}
-                                >
-                                  💾
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="inventory-sold-stock">
-                            <span className="inventory-sold-value" title="Calculated: Total Stock - Available Stock">
-                              {calculatedSold}
-                            </span>
-                          </td>
-                          <td className="inventory-value-cell">
-                            <div className="inventory-value-info">
-                              <div className="inventory-total-amount">₹{formatCurrency(calculated.totalAmount)}</div>
-                              <div className="inventory-gst-amount">GST: ₹{formatCurrency(calculated.totalGst)}</div>
-                            </div>
-                          </td>
-                          <td className="inventory-actions-cell">
-                            <div className="inventory-action-buttons">
-                              <div className="inventory-quick-actions">
-                                <button
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm inventory-btn-success"
-                                  onClick={() => quickStockAdjustment(p._id, 'increase')}
-                                  disabled={loading}
-                                  title="Add 1 to Stock"
-                                >
-                                  +
-                                </button>
-                                <button
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm inventory-btn-warning"
-                                  onClick={() => quickStockAdjustment(p._id, 'decrease')}
-                                  disabled={loading || p.availableStock <= 0}
-                                  title="Remove 1 from Stock"
-                                >
-                                  -
-                                </button>
-                              </div>
-                              <div className="inventory-main-actions">
-                                <Link
-                                  to={`/edit-product/${p._id}`}
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm"
-                                  title="Edit Product"
-                                >
-                                  ✏️
-                                </Link>
-                                <button
-                                  className="inventory-btn inventory-btn-icon inventory-btn-sm inventory-btn-danger"
-                                  onClick={() => handleDelete(p._id)}
-                                  title="Delete Product"
-                                  disabled={loading}
-                                >
-                                  🗑️
-                                </button>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                
-                {filtered.length === 0 && (
-                  <div className="inventory-empty-state">
-                    <div className="inventory-empty-icon">📦</div>
-                    <h3 className="inventory-empty-title">No products found</h3>
-                    <p className="inventory-empty-description">
-                      {search ? 'Try changing your search terms' : 'Get started by creating your first purchase'}
-                    </p>
-                    <div className="inventory-empty-actions">
-                      <Link to="/add-product" className="inventory-btn inventory-btn-primary">
-                        📥 Create Purchase
-                      </Link>
-                    </div>
-                  </div>
-                )}
+              <div className="corporate-metric-content">
+                <h3 className="corporate-metric-value">{reports.stockStats.lowStock || 0}</h3>
+                <p className="corporate-metric-label">Low Stock Items</p>
               </div>
             </div>
-          </>
-        )}
 
-        {/* Reports Section */}
-        {activeTab === "reports" && (
-          <div className="inventory-reports-section">
-            <div className="inventory-reports-grid">
-              {/* Low Stock Report */}
-              <div className="inventory-report-card">
-                <div className="inventory-report-header">
-                  <h3 className="inventory-report-title">Low Stock Alert</h3>
-                  <span className="inventory-report-badge inventory-report-badge-danger">{reports.lowStock.length} items</span>
-                </div>
-                <div className="inventory-report-content">
-                  {reports.lowStock.length > 0 ? (
-                    <div className="inventory-report-list">
-                      {reports.lowStock.map((product, i) => (
-                        <div key={product._id} className="inventory-report-item">
-                          <div className="inventory-report-item-info">
-                            <span className="inventory-report-item-name">{product.name}</span>
-                            <span className="inventory-report-item-stock inventory-low">{product.availableStock} units</span>
-                          </div>
-                          <div className="inventory-report-item-meta">
-                            <span>Reorder needed</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="inventory-report-empty">
-                      <p>All products have sufficient stock</p>
-                    </div>
+            <div className="corporate-metric-card corporate-metric-danger">
+              <div className="corporate-metric-icon">
+                <FiTrendingDown size={24} />
+              </div>
+              <div className="corporate-metric-content">
+                <h3 className="corporate-metric-value">{reports.stockStats.outOfStock || 0}</h3>
+                <p className="corporate-metric-label">Out of Stock</p>
+              </div>
+            </div>
+
+            <div className="corporate-metric-card corporate-metric-purple">
+              <div className="corporate-metric-icon">
+                <FiDollarSign size={24} />
+              </div>
+              <div className="corporate-metric-content">
+                <h3 className="corporate-metric-value">
+                  {formatCurrency(
+                    products.reduce(
+                      (sum, p) => sum + ((p.price || 0) * (p.availableStock || 0)),
+                      0
+                    )
                   )}
+                </h3>
+                <p className="corporate-metric-label">Stock Value</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Reports */}
+          <div className="corporate-reports-section">
+
+            <div className="corporate-section-header">
+              <h2 className="corporate-section-title">
+                <FiBarChart2 className="corporate-section-icon" />
+                Inventory Analytics
+              </h2>
+            </div>
+
+            <div className="corporate-reports-grid">
+
+              {/* Low Stock */}
+              <div className="corporate-report-card corporate-report-alert">
+                <div className="corporate-report-header">
+                  <h3 className="corporate-report-title">
+                    <FiAlertTriangle className="corporate-report-icon" />
+                    Low Stock Alerts
+                  </h3>
+                  <span className="corporate-report-badge">
+                    {reports.lowStock.length}
+                  </span>
+                </div>
+
+                <div className="corporate-report-content">
+                  {reports.lowStock.length === 0 ? (
+                    <p className="corporate-report-empty">
+                      No items in low stock
+                    </p>
+                  ) : (
+                    reports.lowStock.map((p) => (
+                      <div className="corporate-report-item" key={p._id}>
+
+                        <div className="corporate-report-item-info">
+                          <span className="corporate-report-item-name">{p.name}</span>
+                          <span className="corporate-report-item-hsn">HSN: {p.hsn}</span>
+                        </div>
+
+                        <div className="corporate-report-item-stock">
+                          <span className="corporate-stock-badge stock-low">
+                            {p.availableStock || 0} units
+                          </span>
+
+                          <button className="corporate-action-btn">
+                            <FiChevronRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="corporate-report-footer">
+                  <Link to="/low-stock" className="corporate-report-link">
+                    View all low stock items
+                  </Link>
                 </div>
               </div>
 
               {/* Top Products */}
-              <div className="inventory-report-card">
-                <div className="inventory-report-header">
-                  <h3 className="inventory-report-title">Top Products by Value</h3>
-                  <span className="inventory-report-badge">Top 5</span>
+              <div className="corporate-report-card corporate-report-success">
+                <div className="corporate-report-header">
+                  <h3 className="corporate-report-title">
+                    <FiTrendingUp className="corporate-report-icon" />
+                    Top Products by Value
+                  </h3>
                 </div>
-                <div className="inventory-report-content">
-                  {reports.topProducts.length > 0 ? (
-                    <div className="inventory-report-list">
-                      {reports.topProducts.map((product, i) => {
-                        const calculated = calculateProductValues(product);
-                        const calculatedSold = calculateSoldStock(product);
-                        return (
-                          <div key={product._id} className="inventory-report-item">
-                            <div className="inventory-report-item-info">
-                              <span className="inventory-report-item-rank">#{i + 1}</span>
-                              <span className="inventory-report-item-name">{product.name}</span>
-                              <span className="inventory-report-item-value">₹{formatCurrency(calculated.totalAmount)}</span>
-                            </div>
-                            <div className="inventory-report-item-meta">
-                              <span>Stock: {product.availableStock} • Sold: {calculatedSold}</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+
+                <div className="corporate-report-content">
+                  {reports.topProducts.length === 0 ? (
+                    <p className="corporate-report-empty">No products available</p>
                   ) : (
-                    <div className="inventory-report-empty">
-                      <p>No products available</p>
-                    </div>
+                    reports.topProducts.map((p, i) => {
+                      const stockStatus = getStockStatus(p.availableStock);
+
+                      return (
+                        <div className="corporate-report-item" key={p._id}>
+                          <div className="corporate-report-item-rank">
+                            <span className="corporate-rank-badge">#{i + 1}</span>
+                          </div>
+
+                          <div className="corporate-report-item-info">
+                            <span className="corporate-report-item-name">{p.name}</span>
+                            <span className="corporate-report-item-value">
+                              Value: {formatCurrency((p.price || 0) * (p.availableStock || 0))}
+                            </span>
+                          </div>
+
+                          <div className="corporate-report-item-stock">
+                            <span className={`corporate-stock-badge ${stockStatus.class}`}>
+                              {p.availableStock || 0} units
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
               </div>
 
               {/* GST Summary */}
-              <div className="inventory-report-card">
-                <div className="inventory-report-header">
-                  <h3 className="inventory-report-title">GST Summary</h3>
-                  <span className="inventory-report-badge">Total</span>
+              <div className="corporate-report-card corporate-report-info">
+                <div className="corporate-report-header">
+                  <h3 className="corporate-report-title">
+                    <FiPercent className="corporate-report-icon" />
+                    GST Summary
+                  </h3>
                 </div>
-                <div className="inventory-report-content">
-                  <div className="inventory-gst-summary">
-                    <div className="inventory-gst-item">
-                      <span className="inventory-gst-label">CGST:</span>
-                      <span className="inventory-gst-amount">₹{formatCurrency(reports.gstSummary.totalCGST || 0)}</span>
+
+                <div className="corporate-report-content">
+                  <div className="corporate-gst-summary">
+                    <div className="corporate-gst-item">
+                      <span className="corporate-gst-label">Total CGST</span>
+                      <span className="corporate-gst-value">
+                        {formatCurrency(reports.gstSummary.totalCGST || 0)}
+                      </span>
                     </div>
-                    <div className="inventory-gst-item">
-                      <span className="inventory-gst-label">SGST:</span>
-                      <span className="inventory-gst-amount">₹{formatCurrency(reports.gstSummary.totalSGST || 0)}</span>
+
+                    <div className="corporate-gst-item">
+                      <span className="corporate-gst-label">Total SGST</span>
+                      <span className="corporate-gst-value">
+                        {formatCurrency(reports.gstSummary.totalSGST || 0)}
+                      </span>
                     </div>
-                    <div className="inventory-gst-item">
-                      <span className="inventory-gst-label">IGST:</span>
-                      <span className="inventory-gst-amount">₹{formatCurrency(reports.gstSummary.totalIGST || 0)}</span>
+
+                    <div className="corporate-gst-item">
+                      <span className="corporate-gst-label">Total IGST</span>
+                      <span className="corporate-gst-value">
+                        {formatCurrency(reports.gstSummary.totalIGST || 0)}
+                      </span>
                     </div>
-                    <div className="inventory-gst-total">
-                      <span className="inventory-gst-label">Total GST:</span>
-                      <span className="inventory-gst-amount inventory-total">
-                        ₹{formatCurrency(
-                          (reports.gstSummary.totalCGST || 0) + 
-                          (reports.gstSummary.totalSGST || 0) + 
+
+                    <div className="corporate-gst-total">
+                      <span className="corporate-gst-label">Total GST Liability</span>
+                      <span className="corporate-gst-value">
+                        {formatCurrency(
+                          (reports.gstSummary.totalCGST || 0) +
+                          (reports.gstSummary.totalSGST || 0) +
                           (reports.gstSummary.totalIGST || 0)
                         )}
                       </span>
                     </div>
                   </div>
                 </div>
+
+                <div className="corporate-report-footer">
+                  <Link to="/gst-reports" className="corporate-report-link">
+                    View detailed GST reports
+                  </Link>
+                </div>
               </div>
 
               {/* Stock Distribution */}
-              <div className="inventory-report-card">
-                <div className="inventory-report-header">
-                  <h3 className="inventory-report-title">Stock Distribution</h3>
-                  <span className="inventory-report-badge">Overview</span>
+              <div className="corporate-report-card corporate-report-dark">
+                <div className="corporate-report-header">
+                  <h3 className="corporate-report-title">
+                    <FiGrid className="corporate-report-icon" />
+                    Stock Distribution
+                  </h3>
                 </div>
-                <div className="inventory-report-content">
-                  <div className="inventory-stock-distribution">
-                    <div className="inventory-distribution-item">
-                      <span className="inventory-distribution-label">Out of Stock:</span>
-                      <span className="inventory-distribution-count inventory-out">
-                        {reports.stockStats.outOfStock || 0}
-                      </span>
+
+                <div className="corporate-report-content">
+                  <div className="corporate-stock-distribution">
+
+                    <div className="corporate-distribution-item">
+                      <div className="corporate-distribution-bar corporate-bar-in">
+                        <div
+                          className="corporate-bar-fill"
+                          style={{
+                            width: `${(
+                              ((reports.stockStats.inStock || 0) /
+                                (reports.stockStats.totalProducts || 1)) *
+                              100
+                            ).toFixed(1)}%`,
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="corporate-distribution-info">
+                        <span className="corporate-distribution-label">In Stock</span>
+                        <span className="corporate-distribution-value">
+                          {reports.stockStats.inStock || 0} items
+                        </span>
+                      </div>
                     </div>
-                    <div className="inventory-distribution-item">
-                      <span className="inventory-distribution-label">Low Stock:</span>
-                      <span className="inventory-distribution-count inventory-low">
-                        {reports.stockStats.lowStock || 0}
-                      </span>
+
+                    <div className="corporate-distribution-item">
+                      <div className="corporate-distribution-bar corporate-bar-low">
+                        <div
+                          className="corporate-bar-fill"
+                          style={{
+                            width: `${(
+                              ((reports.stockStats.lowStock || 0) /
+                                (reports.stockStats.totalProducts || 1)) *
+                              100
+                            ).toFixed(1)}%`,
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="corporate-distribution-info">
+                        <span className="corporate-distribution-label">Low Stock</span>
+                        <span className="corporate-distribution-value">
+                          {reports.stockStats.lowStock || 0} items
+                        </span>
+                      </div>
                     </div>
-                    <div className="inventory-distribution-item">
-                      <span className="inventory-distribution-label">In Stock:</span>
-                      <span className="inventory-distribution-count inventory-in">
-                        {reports.stockStats.inStock || 0}
-                      </span>
+
+                    <div className="corporate-distribution-item">
+                      <div className="corporate-distribution-bar corporate-bar-out">
+                        <div
+                          className="corporate-bar-fill"
+                          style={{
+                            width: `${(
+                              ((reports.stockStats.outOfStock || 0) /
+                                (reports.stockStats.totalProducts || 1)) *
+                              100
+                            ).toFixed(1)}%`,
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="corporate-distribution-info">
+                        <span className="corporate-distribution-label">Out of Stock</span>
+                        <span className="corporate-distribution-value">
+                          {reports.stockStats.outOfStock || 0} items
+                        </span>
+                      </div>
                     </div>
-                    <div className="inventory-distribution-item">
-                      <span className="inventory-distribution-label">Sold Stock:</span>
-                      <span className="inventory-distribution-count inventory-sold">
-                        {formatNumber(reports.stockStats.calculatedSoldStock || 0)}
+
+                    <div className="corporate-distribution-total">
+                      <span className="corporate-distribution-label">Total Products</span>
+                      <span className="corporate-distribution-value">
+                        {reports.stockStats.totalProducts || 0} items
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
-        )}
-      </div>
+
+          {/* PRODUCTS SECTION */}
+          <div className="corporate-products-section">
+
+            <div className="corporate-section-header">
+              <h2 className="corporate-section-title">
+                <FiShoppingCart className="corporate-section-icon" />
+                Product Inventory
+                <span className="corporate-section-badge">
+                  {filteredProducts.length} items
+                </span>
+              </h2>
+              <p className="corporate-section-subtitle">
+                Showing {filteredProducts.length} of {products.length}
+              </p>
+            </div>
+
+            {products.length === 0 ? (
+              <div className="corporate-empty-state">
+                <FiPackage size={48} />
+                <h3>No products found</h3>
+                <p>Add your first product or upload a CSV file</p>
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="corporate-empty-state">
+                <FiSearch size={48} />
+                <h3>No matching products</h3>
+                <p>Try adjusting your search or filters</p>
+              </div>
+            ) : viewMode === "grid" ? (
+              <div className="corporate-products-grid">
+                {filteredProducts.map((product) => {
+                  const stockStatus = getStockStatus(product.availableStock);
+                  const totalValue =
+                    (product.price || 0) * (product.availableStock || 0);
+
+                  return (
+                    <div className="corporate-product-card" key={product._id}>
+                      <div className="corporate-product-header">
+
+                        <div className="corporate-product-badge">
+                          <span
+                            className={`corporate-stock-status ${stockStatus.class}`}
+                          >
+                            {stockStatus.text}
+                          </span>
+                        </div>
+
+                        <div className="corporate-product-actions">
+                          <button className="corporate-action-icon-btn" title="View">
+                            <FiEye size={14} />
+                          </button>
+
+                          <button className="corporate-action-icon-btn" title="Edit">
+                            <FiEdit size={14} />
+                          </button>
+
+                          <button
+                            className="corporate-action-icon-btn corporate-danger"
+                            title="Delete"
+                            onClick={() => handleDeleteProduct(product._id)}
+                          >
+                            <FiTrash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="corporate-product-content">
+                        <h3 className="corporate-product-name">
+                          {product.name}
+                        </h3>
+
+                        <p className="corporate-product-hsn">HSN: {product.hsn}</p>
+
+                        <div className="corporate-product-details">
+
+                          <div className="corporate-product-detail">
+                            <span className="corporate-detail-label">Rate</span>
+                            <span className="corporate-detail-value">
+                              {formatCurrency(product.price)}
+                            </span>
+                          </div>
+
+                          <div className="corporate-product-detail">
+                            <span className="corporate-detail-label">Stock</span>
+                            <span className="corporate-detail-value">
+                              {product.availableStock || 0} units
+                            </span>
+                          </div>
+
+                          <div className="corporate-product-detail">
+                            <span className="corporate-detail-label">GST</span>
+                            <span className="corporate-detail-value">
+                              {product.gstRate || 0}%
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="corporate-product-value">
+                          <span className="corporate-value-label">Total Value</span>
+                          <span className="corporate-value-amount">
+                            {formatCurrency(totalValue)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="corporate-product-footer">
+                        <button className="corporate-btn corporate-btn-sm corporate-btn-outline">
+                          Quick Order
+                        </button>
+
+                        <button className="corporate-btn corporate-btn-sm corporate-btn-primary">
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="corporate-products-table-container">
+                <table className="corporate-products-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>HSN</th>
+                      <th>Rate</th>
+                      <th>Stock</th>
+                      <th>GST</th>
+                      <th>Value</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredProducts.map((product) => {
+                      const stockStatus = getStockStatus(product.availableStock);
+                      const totalValue =
+                        (product.price || 0) * (product.availableStock || 0);
+
+                      return (
+                        <tr key={product._id}>
+
+                          <td>
+                            <div className="corporate-table-product">
+                              <div className="corporate-table-product-name">
+                                {product.name}
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>{product.hsn}</td>
+
+                          <td>{formatCurrency(product.price)}</td>
+
+                          <td>
+                            <div className="corporate-table-stock">
+                              <span>{product.availableStock || 0}</span>
+                              <small>/ {product.currentStock || 0}</small>
+                            </div>
+                          </td>
+
+                          <td>{product.gstRate || 0}%</td>
+
+                          <td>{formatCurrency(totalValue)}</td>
+
+                          <td>
+                            <span
+                              className={`corporate-status-badge ${stockStatus.class}`}
+                            >
+                              {stockStatus.text}
+                            </span>
+                          </td>
+
+                          <td>
+                            <div className="corporate-table-actions">
+                              <button className="corporate-action-icon-btn" title="View">
+                                <FiEye size={14} />
+                              </button>
+
+                              <button className="corporate-action-icon-btn" title="Edit">
+                                <FiEdit size={14} />
+                              </button>
+
+                              <button
+                                className="corporate-action-icon-btn corporate-danger"
+                                title="Delete"
+                                onClick={() => handleDeleteProduct(product._id)}
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-/* Dashboard.css - Modern Responsive Design with Unique Class Names */
+/* Dashboard.css - Fixed Layout */
 
 /* CSS Variables */
 :root {
@@ -16,10 +16,8 @@
   --nandi-gray-light: #e2e8f0;
   --nandi-border: #e2e8f0;
   --nandi-border-light: #e5e7eb;
-  --nandi-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --nandi-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --nandi-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --nandi-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   --nandi-radius: 0.5rem;
   --nandi-radius-lg: 0.75rem;
   --nandi-transition: all 0.2s ease-in-out;
@@ -35,7 +33,7 @@
 /* Base Container */
 .nandi-dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #f8fafc;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -49,13 +47,15 @@
 
 /* Sidebar - Mobile First */
 .nandi-dashboard-sidebar {
-  width: 100%;
+  width: 280px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid var(--nandi-border);
-  position: fixed;
   height: 100vh;
   overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
   z-index: 1000;
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
@@ -99,7 +99,6 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
-  backdrop-filter: blur(2px);
 }
 
 .nandi-dashboard-overlay.active {
@@ -113,17 +112,18 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-left: 0;
+  transition: margin-left 0.3s ease-in-out;
 }
 
 /* Header */
 .nandi-dashboard-header {
-  background: rgba(255, 255, 255, 0.98);
+  background: #ffffff;
   border-bottom: 1px solid var(--nandi-border);
   padding: 1rem 1.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(8px);
   box-shadow: var(--nandi-shadow);
 }
 
@@ -144,7 +144,7 @@
 .nandi-dashboard-header-text {
   flex: 1;
   min-width: 0;
-  order: 1; /* Text comes first on mobile */
+  order: 1;
 }
 
 /* Small pill above title */
@@ -190,7 +190,7 @@
 .nandi-dashboard-header-actions {
   flex-shrink: 0;
   width: 100%;
-  order: 2; /* Actions come after text on mobile */
+  order: 2;
 }
 
 .nandi-dashboard-logout-btn {
@@ -499,7 +499,7 @@
 
 .nandi-stat-card-summary {
   border-left: 4px solid #10b981;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  background: #f0fdf4;
 }
 .nandi-stat-card-summary .nandi-stat-icon {
   color: #10b981;
@@ -735,7 +735,7 @@
 
   .nandi-dashboard-header {
     padding: 1rem;
-    padding-top: 5rem; /* More space for mobile toggle */
+    padding-top: 4rem;
   }
 
   .nandi-dashboard-header-content {
@@ -816,7 +816,7 @@
   @media (max-width: 360px) {
     .nandi-dashboard-header {
       padding: 0.75rem;
-      padding-top: 4.5rem;
+      padding-top: 3.5rem;
     }
 
     .nandi-dashboard-content {
@@ -856,13 +856,12 @@
    ============================================= */
 @media (min-width: 768px) {
   .nandi-dashboard-sidebar {
-    position: static;
-    width: 280px;
+    position: fixed;
     transform: translateX(0);
   }
 
   .nandi-dashboard-main {
-    margin-left: 0;
+    margin-left: 280px;
     width: calc(100% - 280px);
   }
 
@@ -876,7 +875,7 @@
 
   .nandi-dashboard-header {
     padding: 1.5rem 2rem;
-    padding-top: 1.5rem; /* Reset padding for desktop */
+    padding-top: 1.5rem;
   }
 
   .nandi-dashboard-header-content {
@@ -893,12 +892,12 @@
   }
 
   .nandi-dashboard-header-text {
-    order: 0; /* Reset order */
+    order: 0;
     flex: 1;
   }
 
   .nandi-dashboard-header-actions {
-    order: 0; /* Reset order */
+    order: 0;
     width: auto;
   }
 
@@ -1013,6 +1012,7 @@
   }
 
   .nandi-dashboard-main {
+    margin-left: 300px;
     width: calc(100% - 300px);
   }
 
@@ -1049,7 +1049,7 @@
 
   .nandi-dashboard-header {
     padding: 0.75rem 1rem;
-    padding-top: 4rem;
+    padding-top: 3rem;
   }
 }
 
@@ -1104,7 +1104,7 @@
   }
 
   .nandi-dashboard-container {
-    background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+    background: #0f172a;
   }
 
   .nandi-dashboard-sidebar {
@@ -1113,7 +1113,7 @@
   }
 
   .nandi-dashboard-header {
-    background: rgba(15, 23, 42, 0.96);
+    background: #0f172a;
     border-color: #1e293b;
   }
 
@@ -1130,7 +1130,7 @@
   }
 
   .nandi-stat-card-summary {
-    background: linear-gradient(135deg, #052e16 0%, #020617 100%);
+    background: #052e16;
   }
 }
 
@@ -1238,4 +1238,22 @@
   .nandi-dashboard-summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* =============================================
+   BLUR FIX - REMOVE ALL BACKDROP-FILTER
+   ============================================= */
+.nandi-dashboard-header,
+.nandi-dashboard-overlay,
+.nandi-dashboard-container,
+.nandi-dashboard-main,
+.nandi-dashboard-content,
+.nandi-dashboard-stat-card,
+.nandi-dashboard-action-card,
+.nandi-dashboard-summary-card,
+body,
+html {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
 }
